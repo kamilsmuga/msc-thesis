@@ -16,20 +16,21 @@
 \section{Problem}
 
 
-New IaaS solutions are becoming available with a growing number of supported pricing models. This makes the offering attractive enough to move the entire businesses to the Cloud. The availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictive capacity planning process. Is it better to pay some amount of money upfront and less hourly rate? Is is better to invest in less heavy utilized instances or maybe in more medium ones? When exactly one pricing scheme becomes more cost effective?
+New IaaS solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictive capacity planning process. 
+When exactly does one pricing scheme becomes more cost effective?
 
 
 \begin{itemize}
-  \item Thesis statement: An analysis of current utilization of the infrastructure in terms of price effectiveness in a dynamic pricing IaaS model based on uptime. Estimation of an optimal configuration and possible adjustments based on a recent data.
-  \item Project work: The system will accept incoming data from an IaaS provider - utilisation metrics and a number of running instances for a given type (light, medium, heavy, on demand). The data will be stored, analysed in terms of price optimality and graphed on a capacity planning dashboard.  
+\item Thesis statement: An analysis of current utilization of the infrastructure in terms of price effectiveness in a dynamic pricing IaaS model based on uptime. Estimation of an optimal configuration and possible adjustments based on a recent data.
+\item Project work: The system will accept incoming data from an IaaS provider - utilisation metrics and a number of running instances for a given type (light, medium, heavy, on demand). The data will be stored, analysed in terms of price optimality and graphed on a capacity planning dashboard.  
 \end{itemize}
 
 
 {\bf Motivation.}
 \begin{itemize}
-  \item New startups often attempt to solve globe wide problems and have to either process increasing amounts of data either attract millions of users. Although the problem of scaling is hard enough by itself, the reality with limited budgets requires to tackle the scaling problem from the most optimal, cost-effective angle. Capacity planning can make a difference between making or losing the money in a dynamic, price variable environment. Based on a dynamic nature of business size and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and becomes an integral part of daily operations.
-  \item Solving the problem of visualisation and optimisation of infrastructure costs will make decisions about pricing scheme and choice of the provider possible in an educated and more confident manner.
-  
+\item New startups often attempt to solve globe wide problems and have to either process increasing amounts of data either attract millions of users. Although the problem of scaling is hard enough by itself, the reality with limited budgets requires to tackle the scaling problem from the most optimal, cost-effective angle. Capacity planning can make a difference between making or losing the money in a dynamic, price variable environment. Based on a dynamic nature of business size and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and becomes an integral part of daily operations.
+\item Solving the problem of visualisation and optimisation of infrastructure costs will make decisions about pricing scheme and choice of the provider possible in an educated and more confident manner.
+
 \end{itemize}
 
 
@@ -37,9 +38,9 @@ New IaaS solutions are becoming available with a growing number of supported pri
 %Demonstrate the connection between your chosen problem and its foundations in existing work.
 
 
-  Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficently provide an infrastructure services to the customers.
-  There is also a work that is focusing on IaaS consumer (\cite{bib:cost-aware-elasticity}, \cite{bib:elastic-capacity-planning}). These papers focus on finding an optimal configuration of resources considering cpu, memory, i/o utilisation.
-  This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utlization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
+Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficently provide an infrastructure services to the customers.
+There is also a work that is focusing on IaaS consumer (\cite{bib:cost-aware-elasticity}, \cite{bib:elastic-capacity-planning}). These papers focus on finding an optimal configuration of resources considering cpu, memory, i/o utilisation.
+This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utlization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
 
 
 \section{Methodology}
@@ -47,40 +48,42 @@ New IaaS solutions are becoming available with a growing number of supported pri
 
 \begin{itemize}
 \item High level software design:
-  \begin{itemize}
-   \item Input: Uptime and pricing scheme (on-demand, light, medium, heavy) metrics from the host.
-   \item Analysis: An algorithm that calculates the optimality factor for a given VM based on uptime.
-   \item Output: Send data to graphing system to create a dashboard that shows current usage and optimality ratio.
-  \end{itemize}
+\begin{itemize}
+\item Input: Uptime and pricing scheme (on-demand, light, medium, heavy) metrics from the host.
+\item Analysis: An algorithm that calculates the optimality factor for a given VM based on uptime.
+\item Output: Send data to graphing system to create a dashboard that shows current usage and optimality ratio.
+\end{itemize}
 \end{itemize}
 
-  \section{Project tasks}
-  
-  \begin{itemize}
-  \item Mandatory:
-    \begin{itemize}
-      \item A formal definition of continous capacity planning approach.
-      \item A design of an algorithm that calculates an uptime optimality factor of VM utilisation based on a pricing scheme.
-    \end{itemize}
- 
-  \item Discretionary
-    \begin{itemize}
-      \item An integration with an IaaS provider's API to feed data into the system.
-      \item A graphical representation of results calculated by the algorithm.
-    \end{itemize}
-    
-  \item Exceptional
-    \begin{itemize}
-      \item Generate suggestions to change the configuration based on the calculated results.
-    \end{itemize}
+\section{Project tasks}
+
+\begin{itemize}
+\item Mandatory:
+\begin{itemize}
+\item A definition of continous capacity planning approach.
+\item A design of an algorithm that calculates VM utilisation optimality factor based on a pricing scheme.
+\end{itemize}
+
+\item Discretionary
+\begin{itemize}
+\item An integration with an IaaS provider's API to feed data into the system.
+\item A graphical representation of results calculated by the algorithm.
+\end{itemize}
+
+\item Exceptional
+\begin{itemize}
+\item Suggestions generation to change the configuration based on the calculated results.
+\item An improvement to the algorithm that considers expotential discounting to help to make a cost effective choice over time.
+\item Calculate trends based on historical data and suggest and an optimal configuration for this prediction.
+\end{itemize}
 
 \begin{thebibliography}{50}
-  \bibitem{bib:join_pricing} Ling Tang Sch. of Comput. Sci. & Eng., Nanjing Univ. of Sci. & Technol., Nanjing, China Jinghui Qian ; Lei Xu ; Yu Yan. \textsl{Joint pricing and capacity planning for IaaS cloud}. ICOIN, pages 34-39, 2014.
-  \bibitem{bib:self_adaptive}  Yexi Jiang; Chang-shing Perng; Tao Li; Rong Chang. \textsl{Self-Adaptive Cloud Capacity Planning}. IEEE Ninth International Conference on Services Computing (SCC), pages 73-80, 2012.
-  \bibitem{bib:cost-aware-elasticity} Upendra Sharma, Prashant Shenoy, Sambit Sahu, Anees Shaikh. \textsl{Kingfisher: Cost-aware Elasticity in the Cloud}. INFOCOM, 2011 Proceedings IEEE, pp.206-210, April 2011.
-  \bibitem{bib:elastic-capacity-planning} Cheng Tian; Ying Wang; Bo Yin.\textsl{An elastic capacity planning method in cloud}. ICCSE, pages 239-244, 2012.
+\bibitem{bib:join_pricing} Ling Tang Sch. of Comput. Sci. & Eng., Nanjing Univ. of Sci. & Technol., Nanjing, China Jinghui Qian ; Lei Xu ; Yu Yan. \textsl{Joint pricing and capacity planning for IaaS cloud}. ICOIN, pages 34-39, 2014.
+\bibitem{bib:self_adaptive}  Yexi Jiang; Chang-shing Perng; Tao Li; Rong Chang. \textsl{Self-Adaptive Cloud Capacity Planning}. IEEE Ninth International Conference on Services Computing (SCC), pages 73-80, 2012.
+\bibitem{bib:cost-aware-elasticity} Upendra Sharma, Prashant Shenoy, Sambit Sahu, Anees Shaikh. \textsl{Kingfisher: Cost-aware Elasticity in the Cloud}. INFOCOM, 2011 Proceedings IEEE, pp.206-210, April 2011.
+\bibitem{bib:elastic-capacity-planning} Cheng Tian; Ying Wang; Bo Yin.\textsl{An elastic capacity planning method in cloud}. ICCSE, pages 239-244, 2012.
 \end{thebibliography)
 
-  
+
 
 \end{document}
