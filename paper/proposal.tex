@@ -3,44 +3,37 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{times}
 
-
-\title{UCD\\MSc Thesis Proposal:\\\emph{An Approach To Continuous Capacity Planning In Cloud Environment With Uptime Based Pricing Model}}
+\title{UCD\\MSc Thesis Proposal:\\\emph{An approach for Continuous Capacity Planning in Cloud Environments with Uptime-based Pricing Model}}
 \author{Kamil Smuga}
 \date{\today}
-
 
 \begin{document}
 \maketitle
 
-
 \section{Problem}
 
-
-New IaaS solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictive capacity planning process. One can choose between ad hoc provisioning vs upfront payments and reduced hourly rates. Reserved instances charged upfront are splitted into three groups: light, medium and heavy. Which one is better for a given utilisation model? When exactly does one pricing scheme becomes more cost effective?
-
+New Infrastructure as a Service solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictable capacity planning process. There is a choice between ad-hoc provisioning and upfront payments with reduced hourly rates. Reserved instances charged upfront are categorised into three groups: light, medium and heavy. Which one is better for a given utilisation model? When exactly does one pricing scheme becomes more cost effective? Determining which machine type is better for a given utilisation model, or at which point the cost effectiveness of a pricing scheme changes, is vital for the companies subscribing to the IaaS. 
 
 \begin{itemize}
-\item Thesis statement: An analysis of current utilization of the infrastructure in terms of price effectiveness in a dynamic pricing IaaS model based on uptime. Estimation of an optimal configuration and possible adjustments based on a recent data.
+\item Thesis statement: This thesis will focus on analyzing a system infrastructure utilisation in terms of price effectiveness with uptime-based pricing model.
 \item Project work: The system will accept incoming data from an IaaS provider - utilisation metrics and a number of running instances for a given type (light, medium, heavy, on demand). The data will be stored, analysed in terms of price optimality and graphed on a capacity planning dashboard.  
 \end{itemize}
-
 
 {\bf Motivation.}
 \begin{itemize}
 \item
 
-Capacity planning can make a difference between earning and losing money. Considering a dynamic nature of business and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and become an integral part of daily operations. Having a granual data about infrastructure utilisation is fundamental to make adjustments when it is needed. Frequency of adjustments may vary, however, it is important to have this possibility at any time.
-\item Solving the problem of visualisation and optimisation of infrastructure costs will make decisions about pricing scheme and choice of the provider possible in an educated and more confident manner.
+Capacity planning can make a difference between earning and losing money. Considering the dynamic nature of business and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and become an integral part of daily operations. Having a granular data about infrastructure utilisation is fundamental to make adjustments when it is needed. Frequency of adjustments may vary, however, it is important to have this possibility at any time.
+\item Solving the problem of visualisation and optimisation of infrastructure costs will facilitate more informed and effective pricing scheme and provider selection decisions.
 
 \end{itemize}
-
 
 {\bf Related Work.}
 %Demonstrate the connection between your chosen problem and its foundations in existing work.
 
-Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficently provide an infrastructure services to the customers.
+Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficiently provide an infrastructure services to the customers.
 There is also a work that is focusing on IaaS consumer (\cite{bib:cost-aware-elasticity}, \cite{bib:elastic-capacity-planning}). These papers focus on finding an optimal configuration of resources considering cpu, memory, i/o utilisation.
-This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utlization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
+This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utilization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
 
 \section{Methodology}
 
@@ -58,7 +51,7 @@ This paper will focus on SaaS provider who is charged on VM uptime - a new prici
 \begin{itemize}
 \item Mandatory:
 \begin{itemize}
-\item A definition of continous capacity planning approach.
+\item A definition of continuous capacity planning approach.
 \item A design of an algorithm that calculates VM utilisation optimality factor based on a pricing scheme.
 \end{itemize}
 
@@ -71,12 +64,12 @@ This paper will focus on SaaS provider who is charged on VM uptime - a new prici
 \item Exceptional
 \begin{itemize}
 \item Suggestions generation to change the configuration based on the calculated results.
-\item An improvement to the algorithm that considers expotential discounting to help to make a cost effective choice over time.
+\item An improvement to the algorithm that considers exponential discounting to help to make a cost effective choice over time.
 \item Calculate trends based on historical data and suggest and an optimal configuration for this prediction.
 \end{itemize}
 
 \begin{thebibliography}{50}
-\bibitem{bib:join_pricing} Ling Tang Sch. of Comput. Sci. & Eng., Nanjing Univ. of Sci. & Technol., Nanjing, China Jinghui Qian ; Lei Xu ; Yu Yan. \textsl{Joint pricing and capacity planning for IaaS cloud}. ICOIN, pages 34-39, 2014.
+\bibitem{bib:join_pricing} Ling Tang Sch. of Comput. Sci. & Eng., Nanjing Univ. of Sci. & Technol., Nanjing, China Jinghui Qian ; Lei Xu ; Yu Yan.\textsl{Joint pricing and capacity planning for IaaS cloud}. ICOIN, pages 34-39, 2014.
 \bibitem{bib:self_adaptive}  Yexi Jiang; Chang-shing Perng; Tao Li; Rong Chang. \textsl{Self-Adaptive Cloud Capacity Planning}. IEEE Ninth International Conference on Services Computing (SCC), pages 73-80, 2012.
 \bibitem{bib:cost-aware-elasticity} Upendra Sharma, Prashant Shenoy, Sambit Sahu, Anees Shaikh. \textsl{Kingfisher: Cost-aware Elasticity in the Cloud}. INFOCOM, 2011 Proceedings IEEE, pp.206-210, April 2011.
 \bibitem{bib:elastic-capacity-planning} Cheng Tian; Ying Wang; Bo Yin.\textsl{An elastic capacity planning method in cloud}. ICCSE, pages 239-244, 2012.
