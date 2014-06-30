@@ -16,8 +16,7 @@
 \section{Problem}
 
 
-New IaaS solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictive capacity planning process. 
-When exactly does one pricing scheme becomes more cost effective?
+New IaaS solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilisation and uptime reveals new challenges in already unpredictive capacity planning process. One can choose between ad hoc provisioning vs upfront payments and reduced hourly rates. Reserved instances charged upfront are splitted into three groups: light, medium and heavy. Which one is better for a given utilisation model? When exactly does one pricing scheme becomes more cost effective?
 
 
 \begin{itemize}
@@ -28,7 +27,9 @@ When exactly does one pricing scheme becomes more cost effective?
 
 {\bf Motivation.}
 \begin{itemize}
-\item New startups often attempt to solve globe wide problems and have to either process increasing amounts of data either attract millions of users. Although the problem of scaling is hard enough by itself, the reality with limited budgets requires to tackle the scaling problem from the most optimal, cost-effective angle. Capacity planning can make a difference between making or losing the money in a dynamic, price variable environment. Based on a dynamic nature of business size and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and becomes an integral part of daily operations.
+\item
+
+Capacity planning can make a difference between earning and losing money. Considering a dynamic nature of business and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and become an integral part of daily operations. Having a granual data about infrastructure utilisation is fundamental to make adjustments when it is needed. Frequency of adjustments may vary, however, it is important to have this possibility at any time.
 \item Solving the problem of visualisation and optimisation of infrastructure costs will make decisions about pricing scheme and choice of the provider possible in an educated and more confident manner.
 
 \end{itemize}
@@ -37,14 +38,11 @@ When exactly does one pricing scheme becomes more cost effective?
 {\bf Related Work.}
 %Demonstrate the connection between your chosen problem and its foundations in existing work.
 
-
 Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficently provide an infrastructure services to the customers.
 There is also a work that is focusing on IaaS consumer (\cite{bib:cost-aware-elasticity}, \cite{bib:elastic-capacity-planning}). These papers focus on finding an optimal configuration of resources considering cpu, memory, i/o utilisation.
 This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utlization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
 
-
 \section{Methodology}
-
 
 \begin{itemize}
 \item High level software design:
@@ -83,7 +81,5 @@ This paper will focus on SaaS provider who is charged on VM uptime - a new prici
 \bibitem{bib:cost-aware-elasticity} Upendra Sharma, Prashant Shenoy, Sambit Sahu, Anees Shaikh. \textsl{Kingfisher: Cost-aware Elasticity in the Cloud}. INFOCOM, 2011 Proceedings IEEE, pp.206-210, April 2011.
 \bibitem{bib:elastic-capacity-planning} Cheng Tian; Ying Wang; Bo Yin.\textsl{An elastic capacity planning method in cloud}. ICCSE, pages 239-244, 2012.
 \end{thebibliography)
-
-
 
 \end{document}
