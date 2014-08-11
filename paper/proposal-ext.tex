@@ -2,7 +2,7 @@
 \usepackage{fullpage, setspace, graphicx}
 \usepackage[margin=1in]{geometry}
 \usepackage{times}
-\usepackage[]{algorithm2e}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 
 \title{UCD\\MSc Thesis Proposal:\\\emph{An approach for Continuous Capacity Planning in Cloud Environments with Uptime-based Pricing Model}}
 \author{Kamil Smuga}
@@ -44,32 +44,33 @@ This paper will focus on SaaS provider who is charged on VM uptime - a new prici
 	\begin{itemize}
 	\item Uptime - metric to report how long the system is up. By default, it is gathered as an aggregation of total runtime since reboot. Post-processing of this information will be done to distribute total number of running hours per day to align with pricing model.
 
-	Post-processing algorithm to calculate total uptime per hour
-
 	\begin{algorithm}[H]
  		\KwData{Timestamp in epoch, Uptime in seconds}
  		\KwResult{total uptime in seconds per hour}
  		\If{Timestamp indicates a start of new hour e.g. 02:00:00 UTC} {
  			set startHour to Timestamp\;
  			set endHour to Timestamp + 1h\;
- 			set totalUptime to 0\;
+ 			set totalUptime to Uptime\;
+ 			set initialUptime to Uptime\;
  			set lastUptime to Uptime\;
+ 			set dived to False\;
  			return;
  		}
  		\eIf{Timestamp is between startHour and endHour} {
- 			\eIf{Uptime is greater than lastUptime} {
- 				totalUptime = Uptime\;
+ 			\If{Uptime is smaller than lastUptime} {
+ 				totalUptime += lastUptime\;
+ 				set dived to True\;
  			}
- 			{
- 				totalUptime += Uptime\;
- 			}
- 		} (\textsl{Timestamp equals to endHour} \textbf{then} )
+ 		} (\textsl{Timestamp equals endHour} \textbf{then} ) 
  		{
- 			return calculate\_total\_number\_\of\_seconds\_for\_the\_hour()\;
+ 			\eIf{dived} {
+ 				return totalUptime - initialUptime\;
+ 				}
+ 			{
+ 			return Uptime - initialUptime\;
+ 			}
  		}
- 		return\;
- 	
- \caption{Post-processing of uptime raw data}
+ \caption{Post-processing algorithm to calculate total uptime per hour}
 \end{algorithm}
 
 	\item Pricing scheme - one of: on-demand, light, medium, heavy - a property of reserved machine that pricing is based on.
