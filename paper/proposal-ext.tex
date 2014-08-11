@@ -1,0 +1,111 @@
+\documentclass[11pt]{artikel3}
+\usepackage{fullpage, setspace, graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage[]{algorithm2e}
+
+\title{UCD\\MSc Thesis Proposal:\\\emph{An approach for Continuous Capacity Planning in Cloud Environments with Uptime-based Pricing Model}}
+\author{Kamil Smuga}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Problem}
+
+New Infrastructure as a Service solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilization and uptime reveals new challenges in already unpredictable capacity planning process. There is a choice between ad-hoc provisioning and upfront payments with reduced hourly rates. Reserved instances charged upfront are categorized into three groups: light, medium and heavy. Which one is better for a given utilization model? When exactly does one pricing scheme becomes more cost effective? Determining which machine type is better for a given utilization model, or at which point the cost effectiveness of a pricing scheme changes, is vital for the companies subscribing to the IaaS. 
+
+\begin{itemize}
+\item Thesis statement: This thesis will focus on analyzing a system infrastructure utilization in terms of price effectiveness with uptime-based pricing model. This work will emphasis an importance of knowledge of distributed system state to allow making optimal changes and plan for future.
+\item Project work: The system will accept incoming data from an IaaS provider - utilization metrics and a number of running instances for a given type (light, medium, heavy, on demand). The data will be stored, analyzed in terms of price optimality and graphed on a capacity planning dashboard.  
+\end{itemize}
+
+{\bf Motivation.}
+\begin{itemize}
+\item Capacity planning can make a difference between earning and losing money. Considering the dynamic nature of business and external factors like pricing, capacity planning and provisioning need to be continuously adjusted and become an integral part of daily operations. Having a granular data about infrastructure utilization is fundamental to make adjustments when it is needed. Frequency of adjustments may vary, however, it is important to have this possibility at any time.
+\item Solving the problem of visualization and optimization of infrastructure costs will facilitate more informed and effective pricing scheme and provider selection decisions.
+\item It is likely that an IaaS user over-provisions an infrastructure to handle all traffic. This creates a scenario where it is desired to know the state of a configuration and optimize if possible. Moreover, changes to existing configuration will affect optimality factors and require to be re-calculated systematically.  
+
+\end{itemize}
+
+{\bf Related Work.}
+%Demonstrate the connection between your chosen problem and its foundations in existing work.
+
+Most of the work in Cloud Capacity Planning field is conducted from IaaS provider perspective (\cite{bib:join_pricing}, \cite{bib:self_adaptive}). The papers investigate how to effectively and efficiently provide an infrastructure services to the customers.
+There is also a work that is focusing on IaaS consumer (\cite{bib:cost-aware-elasticity}, \cite{bib:elastic-capacity-planning}). These papers focus on finding an optimal configuration of resources considering cpu, memory, i/o utilization.
+This paper will focus on SaaS provider who is charged on VM uptime - a new pricing model - rather than purely based on cpu, memory, i/o utilization. Moreover, VM uptime price varies based on a renting strategy. This specific problem seems to be somewhat unexplored in the research area.
+
+\section{Methodology}
+
+\begin{itemize}
+\item High level software design:
+\begin{itemize}
+\item Input per single host: 
+	\begin{itemize}
+	\item Uptime - metric to report how long the system is up. By default, it is gathered as an aggregation of total runtime since reboot. Post-processing of this information will be done to distribute total number of running hours per day to align with pricing model.
+
+	Post-processing algorithm to calculate total uptime per hour
+
+	\begin{algorithm}[H]
+ 		\KwData{Timestamp in epoch, Uptime in seconds}
+ 		\KwResult{total uptime in seconds per hour}
+ 		\If{Timestamp indicates a start of new hour e.g. 02:00:00 UTC} {
+ 			set startHour to Timestamp\;
+ 			set endHour to Timestamp + 1h\;
+ 			set totalUptime to 0\;
+ 			set lastUptime to Uptime\;
+ 			return;
+ 		}
+ 		\eIf{Timestamp is between startHour and endHour} {
+ 			\eIf{Uptime is greater than lastUptime} {
+ 				totalUptime = Uptime\;
+ 			}
+ 			{
+ 				totalUptime += Uptime\;
+ 			}
+ 		} (\textsl{Timestamp equals to endHour} \textbf{then} )
+ 		{
+ 			return calculate\_total\_number\_\of\_seconds\_for\_the\_hour()\;
+ 		}
+ 		return\;
+ 	
+ \caption{Post-processing of uptime raw data}
+\end{algorithm}
+
+	\item Pricing scheme - one of: on-demand, light, medium, heavy - a property of reserved machine that pricing is based on.
+	\end{itemize}
+\item Analysis: An algorithm that calculates an optimality factor for a given host based on a daily value of Uptime and choice of Pricing scheme.
+\item Output: Algorithm results to be send to a graphing system to create dashboards to show current state and optimality ratio.
+\end{itemize}
+\end{itemize}
+
+\section{Project tasks}
+
+\begin{itemize}
+\item Mandatory:
+\begin{itemize}
+\item A definition of continuous capacity planning approach. Explanation why granular knowledge about state of running system is fundamental to make educated choices over time. 
+\item A design of an algorithm that calculates VM utilization optimality factor based on uptime and a pricing scheme.
+\end{itemize}
+
+\item Discretionary
+\begin{itemize}
+\item An integration with an IaaS provider's API to feed data into the system.
+\item A graphical representation of results calculated by the algorithm.
+\end{itemize}
+
+\item Exceptional
+\begin{itemize}
+\item Suggestions generation to change the configuration based on the calculated results.
+\item An improvement to the algorithm that considers exponential discounting to help to make a cost effective choice over time.
+\item Calculate trends based on historical data and suggest and an optimal configuration for this prediction.
+\end{itemize}
+\end{itemize}
+
+\begin{thebibliography}{50}
+\bibitem{bib:join_pricing} Ling Tang Sch. of Comput. Sci. \& Eng., Nanjing Univ. of Sci. \& Technol., Nanjing, China Jinghui Qian ; Lei Xu ; Yu Yan.\textsl{Joint pricing and capacity planning for IaaS cloud}. ICOIN, pages 34-39, 2014.
+\bibitem{bib:self_adaptive}  Yexi Jiang; Chang-shing Perng; Tao Li; Rong Chang. \textsl{Self-Adaptive Cloud Capacity Planning}. IEEE Ninth International Conference on Services Computing (SCC), pages 73-80, 2012.
+\bibitem{bib:cost-aware-elasticity} Upendra Sharma, Prashant Shenoy, Sambit Sahu, Anees Shaikh. \textsl{Kingfisher: Cost-aware Elasticity in the Cloud}. INFOCOM, 2011 Proceedings IEEE, pp.206-210, April 2011.
+\bibitem{bib:elastic-capacity-planning} Cheng Tian; Ying Wang; Bo Yin.\textsl{An elastic capacity planning method in cloud}. ICCSE, pages 239-244, 2012.
+\end{thebibliography}
+\end{document}
