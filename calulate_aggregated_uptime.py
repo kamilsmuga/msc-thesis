@@ -30,6 +30,28 @@ machines_count = len(machines)
 print 'Total count of machines: %s' % machines_count
 print 'Last time stamp: %s' % last_timestamp
 
+for machine in machines:
+    list = machines[machine]
+    zeroes = 0
+    ones = 0
+    twos = 0
+    for x in list:
+        for k,v in x.items():
+            if v == 0:
+                zeroes += 1
+            elif v == 1:
+                ones += 1
+            elif v == 2:
+                twos += 1
+    if zeroes > ones:
+        print 'zeroes: %s ones: %s twos: %s ' % (zeroes, ones, twos)
+        print machine
+        print machines[machine]
+
+
+
+
+
 """
 fileobj = open('test', 'w')
 try:
