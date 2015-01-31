@@ -2,6 +2,9 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{csvsimple}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project details
@@ -63,8 +66,22 @@
 
 \chapter{Design and Implementation of Optimality Algorithm Based on Uptime and Pricing Scheme}
 
-\section{Design}
+\section{Taxonomy}
 
+\subsection{Upfront cost}
+
+Investement in compute resources comes with upfront cost. In case of physical machine it is hardware or lease cost. For virtual resources, IaaS providers offer per hour discounts for upfront charged schemes. \par
+Upfront cost is considered to be one time payment and will be represented by \textit{u}. 
+
+\subsection{Cost per hour}
+
+Cost per hour represents an aggregated cost of running a single machine divided by number of hours in a calendar year. Aggregate cost is relatively easy to calculate for virtualized environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as partial cost per hour and defined as \textit{pcph}. \par
+Cost of running of physical hardware is less straightforward to calculate as it includes: power consumption, operations, hardware replacements cost, data center related costs and many others that may vary based on individual cases. Although more troublesome to calculate, cost per hour per host for physical infrastructure is possible to calculate. \par
+Cost per hour will be defined as \textit{cph}. Considering the fact that upfront cost is more substantial for light usage than 24/7, cost per hour will be defined as a function of hours/day usage defined as \textit{h} and calculated from equation:
+\begin{equation}
+cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
+\end{equation}
+\section{Design}
 \section{Implementation}
 
 %%%%%%%%%%%%%%%%%%%%%%  
@@ -73,6 +90,15 @@
 %%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Algorithm Testing on Google Cluster Usage Dataset}
+
+\section{Input data assumptions} 
+
+Based on data published for AWS~\cite{AWS:2014} 
+
+\csvautotabular{out}
+
+\includegraphics[width=\linewidth]{cph}
+\includegraphics[width=\linewidth]{cph_zoom}
 
 \section{Calculate cost per hour for each pricing scheme: light, medium and heavy}
 
@@ -103,7 +129,7 @@
 
 \newpage
 \begin{thebibliography}{99}
-\bibitem{DAWSON:2000} Christian Dawson. \emph{The Essence of Computing Projects -- A Student's Guide}. 192 pages. ISBN: 013021972X. Pearson Education, 2000.
+\bibitem{AWS:2014} http://forecastcloudy.net/2012/04/02/amazon-web-services-aws-ec2-pricing-data/ https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json
 \end{thebibliography}
 \label{endpage}
 
