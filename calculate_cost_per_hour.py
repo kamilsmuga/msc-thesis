@@ -2,24 +2,6 @@
 
 import matplotlib.pyplot as plot
 
-lights = []
-mediums = []
-heavies = []
-entities = []
-
-class Entity:
-    def __init__(self, name, light, medium, heavy):
-        self.name = name
-        self.light = light
-        self.medium = medium
-        self.heavy = heavy
-
-    def calc_cost_per_hour(self, mode, hours_per_day):
-        upfront = int(mode["upfront"])
-        cost_per_hour = float(mode["perhour"])
-        cph = (upfront + (365 * cost_per_hour * hours_per_day)) / (365 * hours_per_day)
-        return cph   
-
 # values for size: cc2.8xlarge region: us-east
 # 1 year reservation
 c_name = 'cc2.8xlarge'
@@ -41,22 +23,41 @@ h_light = { "upfront" : "3968", "perhour" : "2.24" }
 h_medium = { "upfront" : "9200", "perhour" : "1.38" }
 h_heavy = { "upfront" : "11213", "perhour" : "0.92" }
 
-c_entity = Entity(c_name, c_light, c_medium, c_heavy)
-m_entity = Entity(m_name, m_light, m_medium, m_heavy)
-h_entity = Entity(h_name, h_light, h_medium, h_heavy)
+class Entity:
+    def __init__(self, name, light, medium, heavy):
+        self.name = name
+        self.light = light
+        self.medium = medium
+        self.heavy = heavy
+        self.ligth_cph = [ self._calc_cost_per_hour(self.light, x) for x in range(1,25) ]
+        self.medium_cph = [ self._calc_cost_per_hour(self.medium, x) for x in range(1,25) ]
+        self.heavy_cph = [ self._calc_cost_per_hour(self.heavy, x) for x in range(1,25) ]
 
-entities.extend([c_entity, m_entity, h_entity])
+    def _calc_cost_per_hour(self, mode, hours_per_day):
+        upfront = int(mode["upfront"])
+        cost_per_hour = float(mode["perhour"])
+        cph = (upfront + (365 * cost_per_hour * hours_per_day)) / (365 * hours_per_day)
+        return cph   
 
-for e in entities:
-    lights = [ e.calc_cost_per_hour(e.light, x) for x in range(1,25) ] 
-    mediums = [ e.calc_cost_per_hour(e.medium, x) for x in range(1,25) ]
-    heavies = [ e.calc_cost_per_hour(e.heavy, x) for x in range(1,25) ]
+    def plot(self):
+            t = range(24)
+            plot.plot(t, self.ligth_cph, t, self.medium_cph, t, self.heavy_cph)
+            plot.savefig(self.name + '.png')
+            plot.clf()
 
-    t = range(24)
-    plot.plot(t, lights, t, mediums, t, heavies)
-    plot.savefig(e.name + '.png')
-    plot.clf()
+def main():
+    entities = []
+    c_entity = Entity(c_name, c_light, c_medium, c_heavy)
+    m_entity = Entity(m_name, m_light, m_medium, m_heavy)
+    h_entity = Entity(h_name, h_light, h_medium, h_heavy)
 
+    entities.extend([c_entity, m_entity, h_entity])
+
+    for e in entities:
+        e.plot()
+
+if __name__ == "__main__":
+    main()
 
 
 #    print "light,medium,heavy"
