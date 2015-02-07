@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import matplotlib.pyplot as plot
+import csv
 
 # values for size: cc2.8xlarge region: us-east
 # 1 year reservation
@@ -41,9 +42,21 @@ class Entity:
 
     def plot(self):
             t = range(24)
-            plot.plot(t, self.ligth_cph, t, self.medium_cph, t, self.heavy_cph)
+            light_plot = plot.plot(t, self.ligth_cph, label='light')
+            medium_plot = plot.plot(t, self.medium_cph, label='medium')
+            heavy_plot = plot.plot(t, self.heavy_cph, label='heavy')
+
+            plot.legend(['light', 'medium', 'heavy'])
             plot.savefig(self.name + '.png')
             plot.clf()
+
+    def to_csv(self):
+        with open(self.name + '.csv', 'wb') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            csvwriter.writerow(['light', 'medium', 'heavy'])
+            for i in range(24):
+                csvwriter.writerow([self.ligth_cph[i], self.medium_cph[i], self.heavy_cph[i]])
 
 def main():
     entities = []
@@ -55,11 +68,7 @@ def main():
 
     for e in entities:
         e.plot()
+        e.to_csv()
 
 if __name__ == "__main__":
     main()
-
-
-#    print "light,medium,heavy"
-#    for i in range(24):
-#        print "%s,%s,%s" % (lights[i], mediums[i], heavies[i])
