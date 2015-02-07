@@ -33,6 +33,9 @@ class Entity:
         self.ligth_cph = [ self._calc_cost_per_hour(self.light, x) for x in range(1,25) ]
         self.medium_cph = [ self._calc_cost_per_hour(self.medium, x) for x in range(1,25) ]
         self.heavy_cph = [ self._calc_cost_per_hour(self.heavy, x) for x in range(1,25) ]
+        self.i_light_to_medium = self._calc_intersection_point(self.ligth_cph, self.medium_cph)
+        self.i_medium_to_high = self._calc_intersection_point(self.medium_cph, self.heavy_cph)
+        self.i_light_to_high = self._calc_intersection_point(self.ligth_cph, self.heavy_cph)
 
     def _calc_cost_per_hour(self, mode, hours_per_day):
         upfront = int(mode["upfront"])
@@ -40,11 +43,16 @@ class Entity:
         cph = (upfront + (365 * cost_per_hour * hours_per_day)) / (365 * hours_per_day)
         return cph   
 
+    def _calc_intersection_point(self, first, second):
+        for i in range(len(first)):
+            if (second[i] <= first[i]):
+                return i
+
     def plot(self):
             t = range(24)
-            light_plot = plot.plot(t, self.ligth_cph, label='light')
-            medium_plot = plot.plot(t, self.medium_cph, label='medium')
-            heavy_plot = plot.plot(t, self.heavy_cph, label='heavy')
+            light_plot = plot.plot(t, self.ligth_cph)
+            medium_plot = plot.plot(t, self.medium_cph)
+            heavy_plot = plot.plot(t, self.heavy_cph)
 
             plot.legend(['light', 'medium', 'heavy'])
             plot.savefig(self.name + '.png')
@@ -59,16 +67,16 @@ class Entity:
                 csvwriter.writerow([self.ligth_cph[i], self.medium_cph[i], self.heavy_cph[i]])
 
 def main():
-    entities = []
-    c_entity = Entity(c_name, c_light, c_medium, c_heavy)
-    m_entity = Entity(m_name, m_light, m_medium, m_heavy)
-    h_entity = Entity(h_name, h_light, h_medium, h_heavy)
-
-    entities.extend([c_entity, m_entity, h_entity])
+    entities = [ Entity(c_name, c_light, c_medium, c_heavy), Entity(m_name, m_light, m_medium, m_heavy), Entity(h_name, h_light, h_medium, h_heavy) ]
 
     for e in entities:
-        e.plot()
-        e.to_csv()
+        #e.plot()
+        #e.to_csv()
+        print e.name
+        print e.i_light_to_medium
+        print e.i_medium_to_high
+        print e.i_light_to_high
+        
 
 if __name__ == "__main__":
     main()
