@@ -2,16 +2,17 @@
 
 import matplotlib.pyplot as plot
 import csv
-from pyspark import SparkContext, SparkConf
+from ast import literal_eval
+from pyspark import SparkContext, SparkConf, StorageLevel
 
 """
--------------------
-SPARK CONFIGURATION
--------------------
-
 --------------------------------------------------------
+SPARK CONFIGURATION
+
 Used only for standalone execution via bin/spark-submit
 --------------------------------------------------------
+"""
+
 conf = (SparkConf()
         .setMaster("local")
         .setAppName("Uptime per machine")
@@ -19,8 +20,16 @@ conf = (SparkConf()
         .set("spark.local.dir", "/home/ks/workspace/data/spark-out"))
 sc = SparkContext(conf = conf)
 """
+--------------------------------------------------------
+FIRST TRANSFORMATION 
 
-def calc_task_time(line):
+Calculate aggregated time spent on tasks per machine
+Produces K,V - (machine id, aggregated time)
+--------------------------------------------------------
+"""
+
+
+def calc_aggregated_task_time(line):
     """
     Map function to calculate total time spent on task 
     Returns tuple: (machine, task_time)
@@ -56,10 +65,34 @@ def calc_task_time(line):
     result = int(end) - int(start)
     if result < 0:
         return (machine, 0)
-    else return (machine, result)
+    else: 
+        return (machine, result)
 
-distFile = sc.textFile("/home/ks/workspace/data/clusterdata-2011-2/task_usage/part-00000-of-00500.csv")
-task_time = distFile.map(calc_task_time)
+#distFile = sc.textFile("/home/ks/workspace/data/clusterdata-2011-2/task_usage/part-*")
+#task_time = distFile.map(calc_aggregated_task_time)
+#count = task_time.reduceByKey(lambda a, b: a + b)
+#count.saveAsTextFile("/home/ks/workspace/data/spark-out/machine_to_aggregated_task_times")
+
+"""
+-------------------------------------------------------
+SECOND TRANSFORMATION 
+
+Convert aggregated time from microseconds to hours 
+and calculate avg number of parralel tasks per machine
+-------------------------------------------------------
+"""
+
+def microseconds_to_hours(value):
+    value = literal_eval(value)
+    calc = float(int(value[1]) / 1000000 / 60 / 60 / 24 / 29)
+    return (value[0], calc)
+
+
+distFile = sc.textFile("/home/ks/workspace/data/spark-out/machine_to_aggregated_task_times/*")
+task_time = distFile.map(microseconds_to_hours)
+#count = task_time.reduceByKey(lambda a: a / 27)
+task_time.saveAsTextFile("/home/ks/workspace/data/spark-out/avg_number_of_parallel_tasks2   ")
+
 
 """ 
 ------------------
@@ -146,5 +179,5 @@ def main():
         print e.i_light_to_high
         
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
