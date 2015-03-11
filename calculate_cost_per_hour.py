@@ -14,14 +14,129 @@ Used only for standalone execution via bin/spark-submit
 """
 
 conf = (SparkConf()
-        .setMaster("local")
+        .setMaster("spark://ksmuga-wsm.internal.salesforce.com:7077")
         .setAppName("Uptime per machine")
         .set("spark.executor.memory", "10g")
+        .set("spark.driver.memory", "3g")
         .set("spark.local.dir", "/Users/ksmuga/workspace/data/out"))
 sc = SparkContext(conf = conf)
+
+
 """
 --------------------------------------------------------
-FIRST TRANSFORMATION 
+FIRST MAPPING TRANSFORMATION 
+
+List tasks durations, timestamps, sampled cpu usage,
+canonical memory and max memory usage. 
+--------------------------------------------------------
+
+Schema after transformation:
+
+        1,machine ID,INTEGER,YES
+        2,start time,INTEGER,YES
+        3,end time,INTEGER,YES
+        4,duration INTEGER,YES
+        5,sampled CPU usage,FLOAT,NO
+        6,assigned memory usage,FLOAT,NO
+        7,maximum memory usage,FLOAT,NO
+
+"""
+
+def first_mapping(line):
+    splits = line.split(",")
+    # key: machine id
+    machine_id = int(splits[4])
+    # timestamps for start and end time
+    start = int(splits[0])
+    end = int(splits[1])
+    # calculate duration
+    duration = end - start
+    if duration < 0:
+        duration = 0
+    cpu = float(splits[19])
+    assiged_memory = float(splits[7])
+    max_memory = float(splits[10])
+
+    tup = (start, end, duration, cpu, assiged_memory, max_memory)
+
+    return (machine_id, str(tup))
+
+
+#r1 = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-00000-of-00500.csv")
+#r2 = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-00250-of-00500.csv")
+#r3 = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-00499-of-00500.csv")
+#rrds = sc.union([r1, r2, r3])
+rrds = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part*")
+task_time = rrds.map(first_mapping)
+task_time.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping")
+
+"""
+--------------------------------------------------------
+SECOND MAPPING TRANSFORMATION 
+
+Figures out day number and hours from timestamps 
+--------------------------------------------------------
+
+Schema after transformation:
+
+        1,machine ID,INTEGER,YES
+        2,day,INTEGER,YES
+        3,start hour,INTEGER,YES
+        4,end hour,INTEGER,YES
+        5,duration INTEGER,YES
+        6,sampled CPU usage,FLOAT,NO
+        7,assigned memory usage,FLOAT,NO
+        8,maximum memory usage,FLOAT,NO
+
+"""
+
+def second_mapping(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    start_time = int(splits[1].strip())
+    end_time = int(splits[2].strip())
+    day = figure_out_day(start_time)
+    start_hour = figure_out_hour(start_time, day)
+    end_hour = figure_out_hour(end_time, day)   
+    duration = splits[3]
+    cpu = splits[4]
+    assigned_memory = splits[5]
+    max_memory = splits[6]
+
+    return (machine_id, day, start_hour, end_hour, duration, cpu, assigned_memory, max_memory)
+
+# number of microseconds in a day
+micr_secs_in_a_day = 86400000000
+# number of microseconds in an hour
+micr_secs_in_an_hour = 3600000000
+# start offset - 600 seconds in microseconds
+start_offset = 600 * 1000000
+
+
+def figure_out_day(timestamp):
+    if (timestamp <= micr_secs_in_a_day + start_offset):
+        return 0
+    elif (timestamp >= micr_secs_in_a_day * 29 + start_offset):
+        return 28
+
+    return round((timestamp + start_offset) / micr_secs_in_a_day)
+
+def figure_out_hour(timestamp, day):
+    base = day * 86400000000
+    diff = timestamp - base 
+
+    return round(diff / micr_secs_in_an_hour)
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping/part*")
+task_time = distFile.map(second_mapping)
+task_time.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping")
+
+
+
+
+"""
+--------------------------------------------------------
+DEPRECATED TRANSFORMATION 
 
 Calculate aggregated time spent on tasks per machine
 Produces K,V - (machine id, aggregated time)
@@ -73,70 +188,6 @@ distFile = sc.textFile("/home/ks/workspace/data/clusterdata-2011-2/task_usage/pa
 task_time = distFile.map(calc_aggregated_task_time)
 count = task_time.reduceByKey(lambda a, b: a + b)
 count.saveAsTextFile("/home/ks/workspace/data/spark-out/machine_to_aggregated_task_times")
-"""
-
-"""
---------------------------------------------------------
-SECOND TRANSFORMATION 
-
-List tasks durations, timestamps, sampled cpu usage,
-canonical memory and max memory usage. 
---------------------------------------------------------
-
-Schema after transformation:
-
-        1,machine ID,INTEGER,YES
-        2,start time,INTEGER,YES
-        3,end time,INTEGER,YES
-        4,duration INTEGER,YES
-        4,sampled CPU usage,FLOAT,NO
-        5,assigned memory usage,FLOAT,NO
-        6,maximum memory usage,FLOAT,NO
-
-"""
-
-def transform_data(line):
-    splits = line.split(",")
-    # key: machine id
-    machineId = splits[4]
-    # timestamps for start and end time
-    start = splits[0]
-    end = splits[1]
-    # calculate duration
-    duration = int(end) - int(start)
-    if duration < 0:
-        duration = 0
-    cpu = splits[19]
-    assiged_memory = splits[7]
-    max_memory = splits[10]
-
-    return (machineId, (start, end, duration, cpu, assiged_memory, max_memory))
-
-
-distFile = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-*")
-task_time = distFile.map(transform_data)
-groups = task_time.groupByKey()
-groups.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-two")
-
-"""
--------------------------------------------------------
-TEST TRANSFORMATION 
-
-Convert aggregated time from microseconds to hours 
-and calculate avg number of parralel tasks per machine
--------------------------------------------------------
-
-
-def microseconds_to_hours(value):
-    value = literal_eval(value)
-    calc = float(int(value[1]) / 1000000 / 60 / 60 / 24 / 29)
-    return (value[0], calc)
-
-
-distFile = sc.textFile("/home/ks/workspace/data/spark-out/machine_to_aggregated_task_times/*")
-task_time = distFile.map(microseconds_to_hours)
-#count = task_time.reduceByKey(lambda a: a / 27)
-task_time.saveAsTextFile("/home/ks/workspace/data/spark-out/avg_number_of_parallel_tasks2   ")
 """
 
 """ 
