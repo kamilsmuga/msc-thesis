@@ -25,6 +25,7 @@
 
 \begin{abstract}
 
+\emph{ /* To be revised. */} \par
 \textsl{New Infrastructure as a Service solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilization and uptime reveals new challenges in already unpredictable capacity planning process. There is a choice between ad-hoc provisioning and upfront payments with reduced hourly rates. Reserved instances charged upfront are categorized into three groups: light, medium and heavy. Which one is better for a given utilization model? When exactly does one pricing scheme becomes more cost effective? Determining which machine type is better for a given utilization model, or at which point the cost effectiveness of a pricing scheme changes, is vital for the companies subscribing to the IaaS. }
 
 \end{abstract}
@@ -36,10 +37,26 @@
 
 \chapter{Introduction}
 
+\emph{ /* Type of the project: The 'Big Idea' / proof by construction. */}
+
 \section{Objectives}
+This work aims to design an algorithm that answer IaaS consumer's price optimality questions and help to make adjustments based on uptime based charging per machine. 
+
+%\section{Thesis statement}
+%\emph{ /* Based on~\cite{proofByConstruction} I have to provide a statement that will be proven by construction. Is it a valid approach? */} \par
+
+%To have a grasp on 'how optimal my infrastructure provisioning is' one should gather VM usage data, split and calculate optimality KPIs 
+
+%To answer price optimality questions asked by IaaS customer, one should split and model usage data and run optimality KPIs based on 
 
 \section{Structure of the Document}
 
+\textbf{Background}. This section will outline the background information related to IaaS consumer challenges related to understanding the whole picture for price optimality of rented infrastructure. \par
+\textbf{Design}. This section explains design and environment conditions for the algorithm to be useful. \par
+\textbf{Implementation}. This sections explains algorithm implementation details and data analytics software that was used - Apache Spark~\cite{spark}. \par
+\textbf{Evaluation}. The proposed algorithmic approach is applied on Google Trace data~\cite{googleTrace}. \par
+\textbf{Conclusion and Further Work}. The completed data analysis is discussed. Further work related to algorithm improvements, automation and lessons learned are presented. 
+ 
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -49,28 +66,31 @@
 \chapter{Background}
 
 \section{The Problem Domain}
+\emph{/* Description of IaaS world - providers and consumers. */}
+\subsection{IaaS consumer point of view}
+\subsection{IaaS provider uptime-based pricing schemes}
 
 \section{Motivation}
-
-\section{IaaS consumer point of view}
-
-\section{IaaS provider uptime-based pricing schemes}
+\emph{ /* Description of the problem - cloud based company runs a mix of software services (real-time streaming, batch, web and database servers) on common hardware. How do they know whether provisioned VMs run in the most optimal configuration? */ }
 
 \section{Literature review}
+\emph{/* Haven't found anything that would tackle this specific problem so far. Might mention the most research is done from IaaS provider perspective? This includes resource scheduling. My work can lead to cost-aware scheduler research */}
+
+%good number of journal papers, a swathe of conference papers, a few recent workshop
+%papers and not too many web sites
 
 
 %%%%%%%%%%%%%%%%%%%%%%
-%%% OPTIMALITY 
-%%% ALGORITHM 
+%%% DESIGN 
 %%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Design and Implementation of Optimality Algorithm Based on Uptime and Pricing Scheme}
+\chapter{Design}
 
 \section{Taxonomy}
 
 \subsection{Upfront cost}
 
-Investement in compute resources comes with upfront cost. In case of physical machine it is hardware or lease cost. For virtual resources, IaaS providers offer per hour discounts for upfront charged schemes. \par
+Investment in compute resources comes with upfront cost. In case of physical machine it is hardware or lease cost. For virtual resources, IaaS providers offer per hour discounts for upfront charged schemes. \par
 Upfront cost is considered to be one time payment and will be represented by \textit{u}. 
 
 \subsection{Cost per hour}
@@ -81,41 +101,61 @@ Cost per hour will be defined as \textit{cph}. Considering the fact that upfront
 \begin{equation}
 cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 \end{equation}
-\section{Design}
-\section{Implementation}
+
+\subsection{Intersection points between pricing schemes}
+\emph{/* How to find points when one pricing scheme becomes */}
+
+\section{Algorithm}
+
+\emph{/* High level design of the algorithm in pseudo-code? */}
+
+\subsection{Calculate cost per hour for a given pricing scheme}
+\subsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+\subsection{Collect VM usage data}
+\subsection{Group usage metrics by machine}
+\subsection{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
+\subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% IMPLEMENTATION 
+%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Implementation}
+
+\emph{/* Implementation quirks related to make it work. Mostly map/reduce jobs written for Apache Spark. */}
 
 %%%%%%%%%%%%%%%%%%%%%%  
+%%% EVALUATION!!!
 %%% ALGORITHM TESTING  
 %%% ON GOOGLE DATASET 
 %%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Algorithm Testing on Google Cluster Usage Dataset}
+\chapter{Evaluation}
 
-\section{Input data assumptions} 
+\emph{/* Evaluation will go through each of Design stages and will perform necessary calculations. Some examples attached below. */}
 
-Based on data published for AWS~\cite{AWS:2014} 
-
+\section{Calculate cost per hour for a given pricing scheme}
+Results for ccs2.xlarge based on data published for AWS~\cite{AWS:2014} \par
 \csvautotabular{out}
-
+\section{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
 \includegraphics[width=\linewidth]{cph}
-\includegraphics[width=\linewidth]{cph_zoom}
+\section{Collect VM usage data}
+\section{Group usage metrics by machine}
+\section{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
+\section{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
 
-\section{Calculate cost per hour for each pricing scheme: light, medium and heavy}
-
-\section{Graph price per hour on y and number of hours/day on x to find cut points}
-
-\section{Calculate optimality factor based on distance from cut points}
 
 %%%%%%%%%%%%%%%%%%%%%%
+%%% OPTIONAL!!!
 %%% CAPACITY PLANNING 
 %%% STRATEGIES    
 %%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Capacity Planning Strategies}
+%\chapter{Capacity Planning Strategies}
 
-\section{Peak-to-mean ratio based resource assignment}
+%\section{Peak-to-mean ratio based resource assignment}
 
-\section{Only heavy instances}
+%\section{Only heavy instances}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% CONCLUSION 
@@ -124,11 +164,13 @@ Based on data published for AWS~\cite{AWS:2014}
 \chapter{Conclusion and Further Work}
 
 %%%%%%%%%%%%%%%%%%%%%%
-%%% BIBLIOGRAPHY 
+%%% REFERENCES 
 %%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
 \begin{thebibliography}{99}
+\bibitem{spark} https://spark.apache.org
+\bibitem{googleTrace} https://code.google.com/p/googleclusterdata
 \bibitem{AWS:2014} http://forecastcloudy.net/2012/04/02/amazon-web-services-aws-ec2-pricing-data/ https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json
 \end{thebibliography}
 \label{endpage}
