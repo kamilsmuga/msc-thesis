@@ -95,9 +95,10 @@ Upfront cost is considered to be one time payment and will be represented by \te
 
 \subsection{Cost per hour}
 
-Cost per hour represents an aggregated cost of running a single machine divided by number of hours in a calendar year. Aggregate cost is relatively easy to calculate for virtualized environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as partial cost per hour and defined as \textit{pcph}. \par
+Cost per hour represents a total cost of running a single machine divided by number of hours in calendar year. Aggregated cost is relatively easy to calculate in rented, virtualized environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as a partial cost per hour and defined as \textit{pcph}. \par
 Cost of running of physical hardware is less straightforward to calculate as it includes: power consumption, operations, hardware replacements cost, data center related costs and many others that may vary based on individual cases. Although more troublesome to calculate, cost per hour per host for physical infrastructure is possible to calculate. \par
-Cost per hour will be defined as \textit{cph}. Considering the fact that upfront cost is more substantial for light usage than 24/7, cost per hour will be defined as a function of hours/day usage defined as \textit{h} and calculated from equation:
+Cost per hour will be defined as \textit{cph}. It includes upfront cost and IaaS provider per hour charges. It is defined as a function of hours of utilization per day.  
+
 \begin{equation}
 cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 \end{equation}
