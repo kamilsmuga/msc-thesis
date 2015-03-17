@@ -5,6 +5,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{csvsimple}
+\usepackage{float}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project details
@@ -18,7 +19,18 @@
 
 \maketitle
 \tableofcontents\pdfbookmark[0]{Table of Contents}{toc}\newpage
+\listoffigures\newpage
+\par{\textbf{List of tables}}
 
+%%%%
+%The most important parts of your thesis are: abstract, introduction, conclusion and
+%references. These are what get read first and make that vital initial impression.
+%%%
+%%%
+%One of first things your examiners will look at is your literature review. If they see a
+%good number of journal papers, a swathe of conference papers, a few recent workshop
+%papers and not too many web sites, they’ll already be impressed.
+%%%
 %%%%%%%%%%%%%%%%%%%%%%
 %%% ABSTRACT 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -39,18 +51,21 @@
 
 \emph{ /* Type of the project: The 'Big Idea' / proof by construction. */}
 
+\section{Description of the problem}
+
+\section{Motivation for solving the problem}
+
 \section{Objectives}
 This work aims to design an algorithm that answer IaaS consumer's price optimality questions and help to make adjustments based on uptime based charging per machine. 
 
-%\section{Thesis statement}
-%\emph{ /* Based on~\cite{proofByConstruction} I have to provide a statement that will be proven by construction. Is it a valid approach? */} \par
+\section{Related work}
 
-%To have a grasp on 'how optimal my infrastructure provisioning is' one should gather VM usage data, split and calculate optimality KPIs 
+\section{Challenges}
 
-%To answer price optimality questions asked by IaaS customer, one should split and model usage data and run optimality KPIs based on 
+\section{Description of methodology}
+Modelling and experimentation
 
-\section{Structure of the Document}
-
+\section{Structure of the Thesis}
 \textbf{Background}. This section will outline the background information related to IaaS consumer challenges related to understanding the whole picture for price optimality of rented infrastructure. \par
 \textbf{Design}. This section explains design and environment conditions for the algorithm to be useful. \par
 \textbf{Implementation}. This sections explains algorithm implementation details and data analytics software that was used - Apache Spark~\cite{spark}. \par
@@ -95,7 +110,7 @@ Upfront cost is considered to be one time payment and will be represented by \te
 
 \subsection{Cost per hour}
 
-Cost per hour represents a total cost of running a single machine divided by number of hours in calendar year. Aggregated cost is relatively easy to calculate in rented, virtualized environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as a partial cost per hour and defined as \textit{pcph}. \par
+Cost per hour represents a total cost of running a single machine divided by number of hours in calendar year. Aggregated cost is relatively easy to calculate in rented, virtualised environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as a partial cost per hour and defined as \textit{pcph}. \par
 Cost of running of physical hardware is less straightforward to calculate as it includes: power consumption, operations, hardware replacements cost, data center related costs and many others that may vary based on individual cases. Although more troublesome to calculate, cost per hour per host for physical infrastructure is possible to calculate. \par
 Cost per hour will be defined as \textit{cph}. It includes upfront cost and IaaS provider per hour charges. It is defined as a function of hours of utilization per day.  
 
@@ -104,7 +119,21 @@ cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 \end{equation}
 
 \subsection{Intersection points between pricing schemes}
-\emph{/* How to find points when one pricing scheme becomes */}
+
+Cost per hour is calculated for each of available pricing schemes. Single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results will produce a graph similar to Figure~\ref{fig:cc2_8xlarge}. Pricing trends are visible. Price drops exponentially for around first 5 hours of usage and almost stabilizes afterwards. Light is the cheapest option for around 15 hours per day usage. This is better visible on Figure~\ref{fig:cph_cc2_8xlarge_zoom}. After 15 hours, it is better to invest in Heavy utilization scheme. This is a point that will be called an intersection point between 2 pricing schemes and referred as \textit{ip(scheme1, scheme2)}. In this example, we can calculate that for cc2.8xlarge instance \textit{ip(light, heavy) = 16}
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{figures/cc2_8xlarge}
+	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance for 1 year~\cite{AWS:2014}}
+	\label{fig:cc2_8xlarge}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{figures/cph_cc2_8xlarge_zoom}
+	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance for 1 year~\cite{AWS:2014}}
+	\label{fig:cph_cc2_8xlarge_zoom}
+\end{figure}
+
 
 \section{Algorithm}
 
@@ -135,16 +164,20 @@ cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 
 \emph{/* Evaluation will go through each of Design stages and will perform necessary calculations. Some examples attached below. */}
 
-\section{Calculate cost per hour for a given pricing scheme}
+\section{Methodology and setup description}
+
+\section{Algorithm walkthrough}
+\subsection{Calculate cost per hour for a given pricing scheme}
 Results for ccs2.xlarge based on data published for AWS~\cite{AWS:2014} \par
 \csvautotabular{out}
-\section{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
-\includegraphics[width=\linewidth]{cph}
-\section{Collect VM usage data}
-\section{Group usage metrics by machine}
-\section{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
-\section{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
+\subsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+%\includegraphics[width=\linewidth]{cph}
+\subsection{Collect VM usage data}
+\subsection{Group usage metrics by machine}
+\subsection{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
+\subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
 
+\section{Summary}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% OPTIONAL!!!
