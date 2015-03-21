@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{csvsimple}
 \usepackage{float}
+\usepackage[]{algorithm2e}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project details
@@ -120,7 +121,9 @@ cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 
 \subsection{Intersection points between pricing schemes}
 
-Cost per hour is calculated for each of available pricing schemes. Single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results will produce a graph similar to Figure~\ref{fig:cc2_8xlarge}. Pricing trends are visible. Price drops exponentially for around first 5 hours of usage and almost stabilizes afterwards. Light is the cheapest option for around 15 hours per day usage. This is better visible on Figure~\ref{fig:cph_cc2_8xlarge_zoom}. After 15 hours, it is better to invest in Heavy utilization scheme. This is a point that will be called an intersection point between 2 pricing schemes and referred as \textit{ip(scheme1, scheme2)}. In this example, we can calculate that for cc2.8xlarge instance \textit{ip(light, heavy) = 16}
+Cost per hour is calculated for each of available pricing schemes. Single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results produces a graph similar to Figure~\ref{fig:cc2_8xlarge}. \par 
+This representation allows to notice pricing trends. In the example below, price drops exponentially for around first 5 hours of usage and nearly stabilizes afterwards. Light is the cheapest option for around 15 hours per day usage. This is better visible on Figure~\ref{fig:cph_cc2_8xlarge_zoom}. After 15 hours, it is better to invest in Heavy utilization scheme. This is the point that will be called \textit{an intersection point} between 2 pricing schemes and noted as \textit{ip(scheme1, scheme2)}. \par
+For the example below, cc2.8xlarge instance's intersection point between Light and Heavy schemes is \textit{ip(light, heavy) = 16}.
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cc2_8xlarge}
@@ -140,10 +143,64 @@ Cost per hour is calculated for each of available pricing schemes. Single result
 \emph{/* High level design of the algorithm in pseudo-code? */}
 
 \subsection{Calculate cost per hour for a given pricing scheme}
+
+\begin{algorithm}[H]
+ \KwData{Upfront cost, Per hour charge, Utilisation [hours per day];}
+ \KwResult{Total cost per hour for a given pricing scheme defined as \textit{cph};}
+ read upfront\;
+ read perhour\;
+ read hours\;	
+ return (upfront + (365 * perhour * hours)) / (365 * hours)
+ \caption{Calculate cost per hour for a given pricing scheme}
+\end{algorithm}
+
 \subsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+
+\begin{algorithm}[H]
+ \KwData{Array of cph for 2 pricing schemes;}
+ \KwResult{Intersection point when one pricing scheme becomes cheaper than the other one;}
+ read array1\;
+ read array2\;
+ \ForAll{cph in array} {
+ 	\If{$cph2 <= $cph1} {
+ 		return cph
+ 	}
+ }
+\caption{Calculate intersection point between two pricing schemes}
+\end{algorithm}
+
 \subsection{Collect VM usage data}
+
+        1,machine ID,INTEGER,YES
+
+        2,start time,INTEGER,YES
+
+        3,end time,INTEGER,YES
+
+        4,duration INTEGER,YES
+
+        5,sampled CPU usage,FLOAT,NO
+
+        6,assigned memory usage,FLOAT,NO
+        
+        7,maximum memory usage,FLOAT,NO
+
 \subsection{Group usage metrics by machine}
+
+\begin{algorithm}[H]
+ \KwData{VM usage data;}
+ \KwResult{Metrics containing calculated duration and day;}
+ read vmMetrics\;
+ \ForAll{line in vmMetrics} {
+        calculateDuration();
+        calculateDay();
+ }
+\caption{VM metrics transformation}
+
 \subsection{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
+
+
+
 \subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
 
 %%%%%%%%%%%%%%%%%%%%%%
