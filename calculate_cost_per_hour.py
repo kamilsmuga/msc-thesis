@@ -27,7 +27,7 @@ sc = SparkContext(conf = conf)
 FIRST MAPPING TRANSFORMATION 
 
 List tasks durations, timestamps, sampled cpu usage,
-canonical memory and max memory usage. 
+canonical me mory and max memory usage. 
 --------------------------------------------------------
 
 Schema after transformation:
@@ -66,10 +66,11 @@ def first_mapping(line):
 #r2 = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-00250-of-00500.csv")
 #r3 = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part-00499-of-00500.csv")
 #rrds = sc.union([r1, r2, r3])
+"""
 rrds = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/task_usage/part*")
 task_time = rrds.map(first_mapping)
 task_time.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping")
-
+"""
 """
 --------------------------------------------------------
 SECOND MAPPING TRANSFORMATION 
@@ -103,7 +104,9 @@ def second_mapping(line):
     assigned_memory = splits[5]
     max_memory = splits[6]
 
-    return (machine_id, day, start_hour, end_hour, duration, cpu, assigned_memory, max_memory)
+    tup = (day, start_hour, end_hour, duration, cpu, assigned_memory, max_memory)
+
+    return (machine_id, str(tup))
 
 # number of microseconds in a day
 micr_secs_in_a_day = 86400000000
@@ -127,7 +130,7 @@ def figure_out_hour(timestamp, day):
 
     return round(diff / micr_secs_in_an_hour)
 
-distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping/part*")
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping/part*", use_unicode=False)
 task_time = distFile.map(second_mapping)
 task_time.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping")
 
