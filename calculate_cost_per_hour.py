@@ -181,10 +181,10 @@ def third_filter(line):
         return True
     else:
         return False
-        
+
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping/part*", use_unicode=False)
 for x in range(0,1):
-    split_by_day = distFile.map(third_filter)
+    split_by_day = distFile.filter(third_filter)
     split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
     day += 1
 
