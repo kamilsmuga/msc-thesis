@@ -154,7 +154,9 @@ Schema after transformation:
 
 """
 
-def third_mapping(line, day):
+day = 0
+
+def third_mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
     machine_id = splits[0].strip()
     day_data = int(splits[1].strip())
@@ -175,7 +177,8 @@ def third_mapping(line, day):
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping/part*", use_unicode=False)
 for x in range(0,3):
     split_by_day = distFile.map(third_mapping)
-    split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + x)
+    split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
+    day++
 
 
 
