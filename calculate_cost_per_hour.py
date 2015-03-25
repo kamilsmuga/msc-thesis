@@ -129,10 +129,53 @@ def figure_out_hour(timestamp, day):
     diff = timestamp - base 
 
     return round(diff / micr_secs_in_an_hour)
-
+"""
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-first-mapping/part*", use_unicode=False)
 task_time = distFile.map(second_mapping)
 task_time.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping")
+"""
+
+"""
+--------------------------------------------------------
+THIRD MAPPING TRANSFORMATION 
+
+Split data by day usage
+--------------------------------------------------------
+
+Schema after transformation:
+
+        1,machine ID,INTEGER,YES
+        2,start hour,INTEGER,YES
+        3,end hour,INTEGER,YES
+        4,duration INTEGER,YES
+        5,sampled CPU usage,FLOAT,NO
+        6,assigned memory usage,FLOAT,NO
+        7,maximum memory usage,FLOAT,NO
+
+"""
+
+def third_mapping(line, day):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    day_data = int(splits[1].strip())
+    if (day_data != day):
+        return
+
+    start_time = int(splits[2].strip())
+    end_time = int(splits[3].strip())
+    duration = splits[4]
+    cpu = splits[5]
+    assigned_memory = splits[6]
+    max_memory = splits[7]
+
+    tup = (day_data, start_time, end_time, duration, cpu, assigned_memory, max_memory)
+
+    return (machine_id, str(tup))
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping/part*", use_unicode=False)
+for x in range(0,3):
+    split_by_day = distFile.map(third_mapping)
+    split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + x)
 
 
 
