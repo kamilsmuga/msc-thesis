@@ -159,12 +159,12 @@ day = 0
 def third_mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
     machine_id = splits[0].strip()
-    day_data = int(splits[1].strip())
+    day_data = float(splits[1].strip())
     if (day_data != day):
         return
 
-    start_time = int(splits[2].strip())
-    end_time = int(splits[3].strip())
+    start_time = splits[2].strip()
+    end_time = splits[3].strip()
     duration = splits[4]
     cpu = splits[5]
     assigned_memory = splits[6]
