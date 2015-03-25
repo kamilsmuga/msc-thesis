@@ -174,11 +174,19 @@ def third_mapping(line):
 
     return (machine_id, str(tup))
 
+def third_filter(line):
+    splits = line.replace("\"","").replace("(", "").split(",")
+    day_data = float(splits[1].strip())
+    if (day_data == day):
+        return True
+    else:
+        return False
+        
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping/part*", use_unicode=False)
-for x in range(0,3):
-    split_by_day = distFile.map(third_mapping)
+for x in range(0,1):
+    split_by_day = distFile.map(third_filter)
     split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
-    day++
+    day += 1
 
 
 
