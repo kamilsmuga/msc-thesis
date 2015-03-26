@@ -258,12 +258,12 @@ def aggregated_uptime(line):
 
 
 for x in range(0, 1):
-    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day), use_unicode=False)
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/*", use_unicode=False)
     distFile.filter(aggregated_uptime)
     dictlist = []
     global machines
     for key, value in machines.iteritems():
-        dictlist.append( [key, print(value)] )
+        dictlist.append( [key, str(value)] )
     destFile = sc.parallelize(dictlist)
     destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
     day += 1
