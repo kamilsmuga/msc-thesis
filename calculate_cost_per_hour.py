@@ -181,14 +181,54 @@ def third_filter(line):
         return True
     else:
         return False
-
+"""
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-mapping/part*", use_unicode=False)
 for x in range(0,30):
     split_by_day = distFile.filter(third_filter)
     split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
     day += 1
+"""
 
+"""
+--------------------------------------------------------
+FOURTH MAPPING TRANSFORMATION 
 
+Calculate uptime and real workload (based on uptime)
+--------------------------------------------------------
+
+Schema after transformation:
+
+        1,machine ID,INTEGER,YES
+        2,uptime (how many hours machine is on),INTEGER,YES
+        3,uptime based on summarized task time,INTEGER,YES
+        4,total CPU usage,INTEGER,YES
+        5,total assigned memory usage,FLOAT,NO
+        6,total maximum memory usage,FLOAT,NO
+
+"""
+
+class Machine:
+
+    start_time = 0
+    end_time = 0
+    real_workload_time = 0
+    total_cpu = 0
+    total_assigned_memory = 0
+    total_max_memory = 0
+
+def aggregated_uptime(line):
+    splits = line.replace("\"","").replace("(", "").split(",")
+    day_data = float(splits[1].strip())
+    if (day_data == day):
+        return True
+    else:
+        return False
+
+for x in range(0,30):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-third/day-" + str(day), use_unicode=False)
+    split_by_day = distFile.filter(aggregated_uptime)
+    split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
+    day += 1
 
 
 """
