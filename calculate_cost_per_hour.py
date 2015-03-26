@@ -145,6 +145,7 @@ Split data by day usage
 Schema after transformation:
 
         1,machine ID,INTEGER,YES
+        2,day
         2,start hour,INTEGER,YES
         3,end hour,INTEGER,YES
         4,duration INTEGER,YES
@@ -209,26 +210,64 @@ Schema after transformation:
 
 class Machine:
 
-    start_time = 0
-    end_time = 0
-    real_workload_time = 0
-    total_cpu = 0
-    total_assigned_memory = 0
-    total_max_memory = 0
+    def __init__(self, id, start_time=0, end_time=0, real_workload_time=0, total_cpu=0, total_assigned_memory=0, total_max_memory=0):
+        _id = id
+        _start_time = start_time
+        _end_time = end_time
+        _real_workload_time = real_workload_time
+        _total_cpu = total_cpu
+        _total_assigned_memory = total_assigned_memory
+        _total_max_memory = total_max_memory
+
+    def __str__(self):
+        return _id + "," + str(( _end_time - _start_time, _real_workload_time, _total_cpu, _total_assigned_memory, _total_max_memory ))
+
+    def add_real_workload_time(self, time):
+        _real_workload_time += time
+
+    def add_cpu(self, cpu):
+        _total_cpu += cpu
+
+    def add_mem(self, memory):
+        _total_assigned_memory += memory
+
+    def add_max_memory(self, memory):
+        _total_max_memory += memory
+
+machines = {}
 
 def aggregated_uptime(line):
-    splits = line.replace("\"","").replace("(", "").split(",")
-    day_data = float(splits[1].strip())
-    if (day_data == day):
-        return True
-    else:
-        return False
+    global machines
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    start_time = float(splits[2].strip())
+    end_time = float(splits[3].strip())
+    duration_of_workload = int(splits[4].strip())
+    cpu = float(splits[5].strip())
+    mem = float(splits[6].strip())
+    total_mem = float(splits[7].strip())
 
-for x in range(0,30):
-    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-second-third/day-" + str(day), use_unicode=False)
-    split_by_day = distFile.filter(aggregated_uptime)
-    split_by_day.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day))
+    if machine_id in machines:
+        machines[machine_id]._end_time = end_time
+        machines[machine_id].add_real_workload_time(duration_of_workload)
+        machines[machine_id].add_cpu(cpu)
+        machines[machine_id].add_mem(mem)
+        machines[machine_id].add_max_memory(total_mem)
+    else:
+        machines[machine_id] = Machine(machine_id, start_time, end_time, duration_of_workload, cpu, mem, total_mem)
+
+
+for x in range(0, 1):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day), use_unicode=False)
+    distFile.filter(aggregated_uptime)
+    dictlist = []
+    global machines
+    for key, value in machines.iteritems():
+        dictlist.append( [key, print(value)] )
+    destFile = sc.parallelize(dictlist)
+    destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
     day += 1
+    machines = {}
 
 
 """
