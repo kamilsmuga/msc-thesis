@@ -208,6 +208,11 @@ Schema after transformation:
 
 """
 
+""" 
+
+BELOW FAILS QUICKLY DUE TO OOM 
+
+"""
 class Machine:
 
     def __init__(self, id, start_time=0, end_time=0, real_workload_time=0, total_cpu=0, total_assigned_memory=0, total_max_memory=0):
@@ -257,18 +262,32 @@ def aggregated_uptime(line):
         machines[machine_id] = Machine(machine_id, start_time, end_time, duration_of_workload, cpu, mem, total_mem)
 
 
+"""
+RRD Spark operations for above ^^
+"""
+
 for x in range(0, 1):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/part*", use_unicode=False)
-    distFile.filter(aggregated_uptime)
-    distFile.collect()
-    dictlist = []
-    global machines
-    for key, value in machines.iteritems():
-        dictlist.append( [key, str(value)] )
-    destFile = sc.parallelize(dictlist)
+    
+    dur = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[4])))
+                .reduceByKey(lambda a,b: a + b)
+
+    cpu = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0],
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[5].strip())))
+                .reduceByKey(lambda a,b: a + b)
+
+    mem = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0],
+            float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[6].strip())))
+            .reduceByKey(lambda a,b: a + b)
+
+    total_mem = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0],
+            float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[7].strip())))
+            .reduceByKey(lambda a,b: a + b)
+
+    destFile = dur.fullOuterJoin(cpu).fullOuterJoin(mem).fullOuterJoin(total_mem)
     destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
     day += 1
-    machines = {}
 
 
 """
