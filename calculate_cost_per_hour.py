@@ -12,14 +12,14 @@ SPARK CONFIGURATION
 Used only for standalone execution via bin/spark-submit
 --------------------------------------------------------
 """
-SparkContext.setSystemProperty("spark.executor.memory", "20g")
-SparkContext.setSystemProperty("spark.default.parallelism", "72")
+SparkContext.setSystemProperty("spark.executor.memory", "28g")
+SparkContext.setSystemProperty("spark.default.parallelism", "500")
 
 conf = (SparkConf()
         .setMaster("spark://ksmuga-wsm.internal.salesforce.com:7077")
         .setAppName("Uptime per machine")
-        .set("spark.worker.memory", "20g")
-        .set("spark.driver.memory", "20g")
+        .set("spark.worker.memory", "28g")
+        .set("spark.driver.memory", "28g")
         .set("spark.local.dir", "/Users/ksmuga/workspace/data/out"))
 sc = SparkContext(conf = conf)
 
@@ -268,24 +268,20 @@ def aggregated_uptime(line):
 RRD Spark operations for above ^^
 """
 
+def mapping(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    start = float(splits[2].strip())
+    end = float(splits[3].strip())
+    return (machine_id, (start, end))
+
 for x in range(0, 1):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/part*", use_unicode=False)
 
-    start = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
-                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[2])))
+    start_end = distFile.map(mapping)
 
-    start_min = map(lambda(x,y): (x,min(y)), start.groupByKey().collect())
-    start = sc.parallelize(start_min)
-
-    end = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
-                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[3])))
-
-    end_max = map(lambda(x,y): (x,max(y)), end.groupByKey().collect())
-    end = sc.parallelize(end_max)
-
-    uptime = start.join(end)
-    uptime = sc.parallelize(uptime)
-    uptime = uptime.map(lambda x: (x[0], x[1][1] - x[1][0]))
+    uptime_list = map(lambda(x,y): (x, max([i[1] for i in list(y)]) - min([i[0] for i in list(y)])), start_end.groupByKey().collect())
+    uptime = sc.parallelize(uptime_listt)
 
     dur = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
                 float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[4]))).reduceByKey(lambda a,b: a + b)
