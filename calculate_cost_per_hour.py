@@ -12,13 +12,14 @@ SPARK CONFIGURATION
 Used only for standalone execution via bin/spark-submit
 --------------------------------------------------------
 """
-SparkConf.setSystemProperty("spark.executor.memory", "10g")
+SparkContext.setSystemProperty("spark.executor.memory", "20g")
+SparkContext.setSystemProperty("spark.default.parallelism", "72")
 
 conf = (SparkConf()
         .setMaster("spark://ksmuga-wsm.internal.salesforce.com:7077")
         .setAppName("Uptime per machine")
-        .set("spark.worker.memory", "10g")
-        .set("spark.driver.memory", "3g")
+        .set("spark.worker.memory", "20g")
+        .set("spark.driver.memory", "20g")
         .set("spark.local.dir", "/Users/ksmuga/workspace/data/out"))
 sc = SparkContext(conf = conf)
 
@@ -269,7 +270,23 @@ RRD Spark operations for above ^^
 
 for x in range(0, 1):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/part*", use_unicode=False)
-    
+
+    start = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[2])))
+
+    start_min = map(lambda(x,y): (x,min(y)), start.groupByKey().collect())
+    start = sc.parallelize(start_min)
+
+    end = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[3])))
+
+    end_max = map(lambda(x,y): (x,max(y)), end.groupByKey().collect())
+    end = sc.parallelize(end_max)
+
+    uptime = start.join(end)
+    uptime = sc.parallelize(uptime)
+    uptime = uptime.map(lambda x: (x[0], x[1][1] - x[1][0]))
+
     dur = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
                 float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[4]))).reduceByKey(lambda a,b: a + b)
 
@@ -282,7 +299,7 @@ for x in range(0, 1):
     total_mem = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0],
             float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[7].strip()))).reduceByKey(lambda a,b: a + b)
 
-    destFile = dur.fullOuterJoin(cpu).fullOuterJoin(mem).fullOuterJoin(total_mem)
+    destFile = uptime.join(dur).join(cpu).join(mem).join(total_mem)
     destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
     day += 1
 
