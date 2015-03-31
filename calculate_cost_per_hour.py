@@ -16,7 +16,7 @@ SparkContext.setSystemProperty("spark.executor.memory", "28g")
 SparkContext.setSystemProperty("spark.default.parallelism", "500")
 
 conf = (SparkConf()
-        .setMaster("spark://ksmuga-wsm.internal.salesforce.com:7077")
+        .setMaster("local")
         .setAppName("Uptime per machine")
         .set("spark.worker.memory", "28g")
         .set("spark.driver.memory", "28g")
@@ -275,13 +275,14 @@ def mapping(line):
     end = float(splits[3].strip())
     return (machine_id, (start, end))
 
-for x in range(0, 1):
+for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/part*", use_unicode=False)
 
-    start_end = distFile.map(mapping)
+    min_start = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[2]))).reduceByKey(lambda a,b: a if a<b else b)
 
-    uptime_list = map(lambda(x,y): (x, max([i[1] for i in list(y)]) - min([i[0] for i in list(y)])), start_end.groupByKey().collect())
-    uptime = sc.parallelize(uptime_listt)
+    max_end = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
+                float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[3]))).reduceByKey(lambda a,b: a if a>b else b)
 
     dur = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
                 float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[4]))).reduceByKey(lambda a,b: a + b)
@@ -295,7 +296,7 @@ for x in range(0, 1):
     total_mem = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0],
             float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[7].strip()))).reduceByKey(lambda a,b: a + b)
 
-    destFile = uptime.join(dur).join(cpu).join(mem).join(total_mem)
+    destFile = min_start.join(max_end).join(cpu).join(mem).join(total_mem)
     destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
     day += 1
 
