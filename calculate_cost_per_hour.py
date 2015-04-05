@@ -203,8 +203,8 @@ Calculate uptime and real workload (based on uptime)
 Schema after transformation:
 
         1,machine ID,INTEGER,YES
-        2,uptime (how many hours machine is on),INTEGER,YES
-        3,uptime based on summarized task time,INTEGER,YES
+        2,min_start (minimum start hour),INTEGER,YES
+        3,max_end (maximum start hour),INTEGER,YES
         4,total CPU usage,INTEGER,YES
         5,total assigned memory usage,FLOAT,NO
         6,total maximum memory usage,FLOAT,NO
@@ -336,7 +336,7 @@ Schema after transformation (splitted per day)
         8,MEMORY capacity,FLOAT,YES
         9,NUMBER of tasks per machine per day
 
-"""
+
 
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
@@ -362,6 +362,25 @@ for x in range(0, 30):
 
     joined_file.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x))
     day += 1
+"""
+"""
+
+GET ONLY UPTIME
+
+"""
+
+def only_uptime_mapping(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    uptime = float(splits[2].strip()) - float(splits[1].strip())
+    return (machine_id, uptime)
+
+for x in range(0, 30):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
+    only_uptime = distFile.map(only_uptime_mapping)
+    distinct_uptime = only_uptime.distinct()
+    distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
+
 
 """
 --------------------------------------------------------
