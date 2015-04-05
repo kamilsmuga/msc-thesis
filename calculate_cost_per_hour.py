@@ -306,7 +306,6 @@ for x in range(0, 30):
 
 Calculate number of tasks per machine per day
 
-"""
 
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
@@ -321,7 +320,48 @@ for x in range(0, 30):
 
     task_counter.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day-" + str(x))
 
+"""
 
+""" 
+JOIN WITH CPU AND CAPACITY INFO
+
+Schema after transformation (splitted per day)
+        1,machine ID,INTEGER,YES
+        2,uptime (how many hours machine is on),INTEGER,YES
+        3,uptime based on summarized task time,INTEGER,YES
+        4,total CPU usage,INTEGER,YES
+        5,CPU capacity, INTEGER, YES
+        6,total assigned memory usage,FLOAT,NO
+        7,total maximum memory usage,FLOAT,NO
+        8,MEMORY capacity,FLOAT,YES
+        9,NUMBER of tasks per machine per day
+
+"""
+
+def mapping(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    uptime = float(splits[1].strip())
+    uptime_total = float(splits[2].strip())
+    total_cpu = float(splits[3].strip())
+    mem = float(splits[4].strip())
+    total_mem = float(splits[5].strip())
+    return (machine_id, (uptime, uptime_total, total_cpu, mem, total_mem))
+
+for x in range(0, 30):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
+    basic_forth = distFile.map(mapping)
+
+    distFileTasks = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day" + str(x) + "/part*", use_unicode=False)
+    tasks_forth = distFileTasks.map(lambda x: (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[1])) 
+
+    capacity = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*")
+    capacity_map = capacity.map(lambda x: (x.split(",")[1], (x.split(",")[4], x.split(",")[5])))
+
+    joined_file = basic_forth.join(capacity_map).join(tasks_forth)
+
+    joined_file.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x))
+    day += 1
 
 """
 --------------------------------------------------------
