@@ -4,6 +4,7 @@ import matplotlib.pyplot as plot
 import csv
 from ast import literal_eval
 from pyspark import SparkContext, SparkConf, StorageLevel
+from operator import add
 
 """
 --------------------------------------------------------
