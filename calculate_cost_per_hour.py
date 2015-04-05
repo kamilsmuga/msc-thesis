@@ -355,7 +355,7 @@ for x in range(0, 30):
     distFileTasks = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day" + str(x) + "/part*", use_unicode=False)
     tasks_forth = distFileTasks.map(lambda x: (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[1])) 
 
-    capacity = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*")
+    capacity = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*", use_unicode=False)
     capacity_map = capacity.map(lambda x: (x.split(",")[1], (x.split(",")[4], x.split(",")[5])))
 
     joined_file = basic_forth.join(capacity_map).join(tasks_forth)
