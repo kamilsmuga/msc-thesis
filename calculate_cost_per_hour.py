@@ -266,7 +266,7 @@ def aggregated_uptime(line):
 
 """
 RRD Spark operations for above ^^
-"""
+
 
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
@@ -276,7 +276,7 @@ def mapping(line):
     return (machine_id, (start, end))
 
 for x in range(0, 30):
-    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(day) + "/part*", use_unicode=False)
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(x) + "/part*", use_unicode=False)
 
     min_start = distFile.map(lambda(x): (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], 
                 float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[2]))).reduceByKey(lambda a,b: a if a<b else b)
@@ -297,8 +297,29 @@ for x in range(0, 30):
             float(x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[7].strip()))).reduceByKey(lambda a,b: a + b)
 
     destFile = min_start.join(max_end).join(cpu).join(mem).join(total_mem)
-    destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(day))
+    destFile.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x))
     day += 1
+"""
+
+"""
+
+Calculate number of tasks per machine per day
+
+"""
+
+def mapping(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    machine_id = splits[0].strip()
+    counter = 1
+    return (machine_id, counter)
+
+for x in range(0, 30):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-third-day-" + str(x) + "/part*", use_unicode=False)
+
+    task_counter = distFile.map(mapping).reduceByKey(add)
+
+    task_counter.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day-" + str(x))
+
 
 
 """
