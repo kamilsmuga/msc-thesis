@@ -337,6 +337,7 @@ Schema after transformation (splitted per day)
         9,NUMBER of tasks per machine per day
 
 
+"""
 
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
@@ -352,22 +353,20 @@ for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
     basic_forth = distFile.map(mapping)
 
-    distFileTasks = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day" + str(x) + "/part*", use_unicode=False)
+    distFileTasks = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-tasks-day-" + str(x) + "/part*", use_unicode=False)
     tasks_forth = distFileTasks.map(lambda x: (x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[0], x.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")[1])) 
 
     capacity = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*", use_unicode=False)
     capacity_map = capacity.map(lambda x: (x.split(",")[1], (x.split(",")[4], x.split(",")[5])))
 
     joined_file = basic_forth.join(capacity_map).join(tasks_forth)
-
-    joined_file.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x))
+    joined_file_distinct = joined_file.distinct()
+    joined_file_distinct.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x))
     day += 1
-"""
 """
 
 GET ONLY UPTIME
 
-"""
 
 def only_uptime_mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
@@ -381,6 +380,7 @@ for x in range(0, 30):
     distinct_uptime = only_uptime.distinct()
     distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
 
+"""
 
 """
 --------------------------------------------------------
