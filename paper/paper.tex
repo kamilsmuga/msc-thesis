@@ -169,7 +169,7 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 \caption{Calculate intersection point between two pricing schemes}
 \end{algorithm}
 
-\subsection{Collect VM usage data}
+\subsection{Metrics collection}
 
         1,machine ID,INTEGER,YES
 
@@ -185,20 +185,28 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
         
         7,maximum memory usage,FLOAT,NO
 
-\subsection{Group usage metrics by machine}
+        8,CPU capacity,FLOAT,YES
 
-\begin{algorithm}[H]
- \KwData{VM usage data;}
- \KwResult{Metrics containing calculated duration and day;}
- read vmMetrics\;
- \ForAll{line in vmMetrics} {
-        calculateDuration();
-        calculateDay();
- }
-\caption{VM metrics transformation}
+        9,Memory capacity,FLOAT,YES
 
-\subsection{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
 
+
+\subsection{Daily metrics aggregation}
+
+\subsubsection{Calculate uptime per machine }
+Input: Job start and end time logged for each machine in a form of \textless K, List\textless V\textgreater\textgreater
+Output: Uptime based on span between min start time and max end time \textless K,V\textgreater
+
+\subsubsection{Aggregate CPU and memory usage}
+Input: Sampled CPU and memory usage logged per job in a form of \textless K, List\textless V\textgreater\textgreater
+Output: Aggregated resource usage \textless K,V\textgreater
+
+\subsubsection{Calculate number of jobs per day}
+Input: Job id per machine \textless K, List\textless V\textgreater\textgreater
+Output: Job count per machine \textless K,V\textgreater
+
+\subsubsection{Calculate cluster averages for aggregations}
+Input: 
 
 
 \subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
