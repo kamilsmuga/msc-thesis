@@ -3,10 +3,16 @@
 \usepackage{hyperref}
 \usepackage[normalem]{ulem}
 \usepackage{amsmath}
-\usepackage{graphicx}
 \usepackage{csvsimple}
 \usepackage{float}
 \usepackage[]{algorithm2e}
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project details
@@ -140,12 +146,12 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 
 \section{Algorithm}
 
-\emph{/* High level design of the algorithm in pseudo-code? */}
+\subsection{Data gathering, transformation and analytics}
 
-\subsection{Calculate cost per hour for a given pricing scheme}
+\subsubsection{Calculate cost per hour for a given pricing scheme}
 
 \begin{algorithm}[H]
- \KwData{Upfront cost, Per hour charge, Utilisation [hours per day];}
+ \KwData{Upfront cost, Per hour charge, Utilization [hours per day];}
  \KwResult{Total cost per hour for a given pricing scheme defined as \textit{cph};}
  read upfront\;
  read perhour\;
@@ -154,7 +160,7 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
  \caption{Calculate cost per hour for a given pricing scheme}
 \end{algorithm}
 
-\subsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+\subsubsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
 
 \begin{algorithm}[H]
  \KwData{Array of cph for 2 pricing schemes;}
@@ -169,7 +175,7 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 \caption{Calculate intersection point between two pricing schemes}
 \end{algorithm}
 
-\subsection{Metrics collection}
+\subsubsection{Metrics collection}
 
         1,machine ID,INTEGER,YES
 
@@ -189,27 +195,66 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 
         9,Memory capacity,FLOAT,YES
 
+\subsubsection{Daily metrics aggregation}
 
-
-\subsection{Daily metrics aggregation}
-
-\subsubsection{Calculate uptime per machine }
+\paragraph{Calculate uptime per machine}
 Input: Job start and end time logged for each machine in a form of \textless K, List\textless V\textgreater\textgreater
+
 Output: Uptime based on span between min start time and max end time \textless K,V\textgreater
 
-\subsubsection{Aggregate CPU and memory usage}
+\paragraph{Aggregate CPU and memory usage}
 Input: Sampled CPU and memory usage logged per job in a form of \textless K, List\textless V\textgreater\textgreater
+
 Output: Aggregated resource usage \textless K,V\textgreater
 
-\subsubsection{Calculate number of jobs per day}
+\paragraph{Calculate number of jobs per day}
 Input: Job id per machine \textless K, List\textless V\textgreater\textgreater
+
 Output: Job count per machine \textless K,V\textgreater
 
-\subsubsection{Calculate cluster averages for aggregations}
-Input: 
+\paragraph{Calculate cluster averages for aggregations}
+Input: Aggregated CPU, memory and number of tasks per machine per day \textless K, List\textless V\textgreater\textgreater
 
+Output: Averages for CPU, memory and number of tasks \textless K, List\textless V\textgreater\textgreater
 
-\subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
+\paragraph{Calculate distance from optimality points based on uptime}
+Input: Machine uptime per day
+
+Output: Distance from optimality points. Might be positive or negative. 
+
+\subsection{Recognize inefficiencies and suggest changes}
+
+\subsubsection{Threshold based report}
+
+Generate report of machines based on distance from optimality points. Use customizable threshold. 
+Results from the report will be used to calculate suggestions.
+
+\subsubsection{Visual recognition}
+
+Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
+Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
+
+\begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/cubism}
+        \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
+        \label{fig:cubism}
+\end{figure}
+
+\subsubsection{Squeeze-them-in suggestion strategy}
+
+Input: results of the Threshold based report. 
+
+Computation: Calculate spare capacity based on average CPU and memory usage. Iterate through a pool of available machines (not included in input report) and advertise available capacity only if CPU and memory usage is lower than average. Aggregate spare capacity results.
+
+Output: List of machines that can be shutdown based on computed spare-capacity.
+
+\subsubsection{New capacity configuration suggestion}
+
+Input: results of the Threshold based report.
+
+Computation: Compute a minimal number of VMs for each configuration based on requested capacity
+
+Output: A number and configuration of the cheapest computed configuration.
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% IMPLEMENTATION 
@@ -228,6 +273,17 @@ Input:
 \chapter{Evaluation}
 
 \emph{/* Evaluation will go through each of Design stages and will perform necessary calculations. Some examples attached below. */}
+
+\subsection{Recognize inefficiencies and suggest changes}
+
+\subsubsection{Threshold based report}
+
+Generate report of machines based on distance from optimality points. Use customizable threshold. 
+Results from the report will be used to calculate suggestions.
+
+\subsubsection{Visual recognition}
+
+
 
 \section{Methodology and setup description}
 
