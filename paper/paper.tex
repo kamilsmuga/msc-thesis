@@ -6,13 +6,10 @@
 \usepackage{csvsimple}
 \usepackage{float}
 \usepackage[]{algorithm2e}
-\usepackage{titlesec}
-\setcounter{secnumdepth}{4}
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
-\titlespacing*{\paragraph}
-{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\usepackage{url}
 
+
+\newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Project details
@@ -106,7 +103,7 @@ Modelling and experimentation
 %%% DESIGN 
 %%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Design}
+\chapter{Design and Implementation}
 
 \section{Taxonomy}
 
@@ -133,20 +130,74 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cc2_8xlarge}
-	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance for 1 year~\cite{AWS:2014}}
+	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:2014}}
 	\label{fig:cc2_8xlarge}
 \end{figure}
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cph_cc2_8xlarge_zoom}
-	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance for 1 year~\cite{AWS:2014}}
+	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:2014}}
 	\label{fig:cph_cc2_8xlarge_zoom}
 \end{figure}
 
 
 \section{Algorithm}
 
-\subsection{Data gathering, transformation and analytics}
+\subsection{Prerequisites} 
+
+In order to make data-driven analysis and suggestions for optimization we need data. Below list of metrics was compiled based on algorithm needs to answer critical questions regarding state of infrastructure deployment. The list is suitable to guarantee performance SLOs only for compute nodes. Machines with significant I/O usage profile are not covered in this paper. 
+Metrics can be gathered periodically, per process or per job. There are open source tools available to gather this data, e.g. collectd\footnote{\url{https://collectd.org}}, munin\footnote{\url{http://munin-monitoring.org}}, Logstash\footnote{\url{http://logstash.net}}.
+
+\myparagraph{Machine Id}
+A unique machine ID. Will be used as a key to compute further analytics.
+
+\myparagraph{Start and End Time}
+Timestamps to indicate start and end of measurement period.
+
+\myparagraph{CPU usage}
+Sampled or averaged CPU usage during measurement period. 
+
+\myparagraph{RAM usage}
+Canonical memory usage measurement. 
+
+Metrics should be aggregated in \textless K, List\textless V\textgreater\textgreater format where K represents Machine Id and Vs are measurements. 
+
+\subsection{Metrics data transformations and analytics}
+
+Metrics gathered in Prerequisites section have limited knowledge about an environment. Collection per job or per process produces one log line and is aware only about measurement period. Having such structured data would not let to answer machine wide neither cluster wide questions. The data has to be post-processed to allow calculation of below listed analytics.   
+
+
+
+\myparagraph{Uptime per machine}
+
+\begin{algorithm}[H]
+ \KwData{Task start and end time}
+ \KwResult{Number of uptime hours per machine per day}
+\end{algorithm}
+
+Input: Job start and end time logged for each machine in a form of \textless K, List\textless V\textgreater\textgreater
+
+Output: Uptime based on span between min start time and max end time \textless K,V\textgreater
+
+\myparagraph{Aggregate CPU and memory usage}
+Input: Sampled CPU and memory usage logged per job in a form of \textless K, List\textless V\textgreater\textgreater
+
+Output: Aggregated resource usage \textless K,V\textgreater
+
+\myparagraph{Calculate number of jobs per day}
+Input: Job id per machine \textless K, List\textless V\textgreater\textgreater
+
+Output: Job count per machine \textless K,V\textgreater
+
+\myparagraph{Calculate cluster averages for aggregations}
+Input: Aggregated CPU, memory and number of tasks per machine per day \textless K, List\textless V\textgreater\textgreater
+
+Output: Averages for CPU, memory and number of tasks \textless K, List\textless V\textgreater\textgreater
+
+\myparagraph{Calculate distance from optimality points based on uptime}
+Input: Machine uptime per day
+
+Output: Distance from optimality points. Might be positive or negative. 
 
 \subsubsection{Calculate cost per hour for a given pricing scheme}
 
@@ -175,52 +226,8 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 \caption{Calculate intersection point between two pricing schemes}
 \end{algorithm}
 
-\subsubsection{Metrics collection}
 
-        1,machine ID,INTEGER,YES
 
-        2,start time,INTEGER,YES
-
-        3,end time,INTEGER,YES
-
-        4,duration INTEGER,YES
-
-        5,sampled CPU usage,FLOAT,NO
-
-        6,assigned memory usage,FLOAT,NO
-        
-        7,maximum memory usage,FLOAT,NO
-
-        8,CPU capacity,FLOAT,YES
-
-        9,Memory capacity,FLOAT,YES
-
-\subsubsection{Daily metrics aggregation}
-
-\paragraph{Calculate uptime per machine}
-Input: Job start and end time logged for each machine in a form of \textless K, List\textless V\textgreater\textgreater
-
-Output: Uptime based on span between min start time and max end time \textless K,V\textgreater
-
-\paragraph{Aggregate CPU and memory usage}
-Input: Sampled CPU and memory usage logged per job in a form of \textless K, List\textless V\textgreater\textgreater
-
-Output: Aggregated resource usage \textless K,V\textgreater
-
-\paragraph{Calculate number of jobs per day}
-Input: Job id per machine \textless K, List\textless V\textgreater\textgreater
-
-Output: Job count per machine \textless K,V\textgreater
-
-\paragraph{Calculate cluster averages for aggregations}
-Input: Aggregated CPU, memory and number of tasks per machine per day \textless K, List\textless V\textgreater\textgreater
-
-Output: Averages for CPU, memory and number of tasks \textless K, List\textless V\textgreater\textgreater
-
-\paragraph{Calculate distance from optimality points based on uptime}
-Input: Machine uptime per day
-
-Output: Distance from optimality points. Might be positive or negative. 
 
 \subsection{Recognize inefficiencies and suggest changes}
 
@@ -234,9 +241,10 @@ Results from the report will be used to calculate suggestions.
 Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
 Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
 
+
 \begin{figure}[H]
-        \includegraphics[width=\linewidth]{figures/cubism}
-        \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
+       \includegraphics[width=\linewidth]{figures/cubism}
+      \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
         \label{fig:cubism}
 \end{figure}
 
