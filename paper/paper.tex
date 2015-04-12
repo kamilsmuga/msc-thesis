@@ -6,9 +6,13 @@
 \usepackage{csvsimple}
 \usepackage{float}
 \usepackage[]{algorithm2e}
+\usepackage[noend]{algpseudocode}
 \usepackage{url}
+\usepackage{listings}             % Include the listings-package
 
 
+\RestyleAlgo{boxruled}
+\lstset{language=Python}
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -164,30 +168,128 @@ Metrics should be aggregated in \textless K, List\textless V\textgreater\textgre
 
 \subsection{Metrics data transformations and analytics}
 
-Metrics gathered in Prerequisites section have limited knowledge about an environment. Collection per job or per process produces one log line and is aware only about measurement period. Having such structured data would not let to answer machine wide neither cluster wide questions. The data has to be post-processed to allow calculation of below listed analytics.   
+Metrics gathered in Prerequisites section have limited knowledge about environment. Collection per job or per process produces one log line and has scope of a measurement period. Having such structured data would not let to answer machine wide neither cluster wide questions. The data has to be post-processed to allow calculation of below listed aggregations and analytics.   
 
+\myparagraph{Daily usage}
+
+The data will be analyzed in terms of daily usage. This requires to split metrics into buckets of one day worth of data. 
+It is achieved by applying a simple filter~\ref{daily_usage} in Apache Spark.
+
+\begin{lstlisting}[label={daily_usage},caption={Daily usage filter},frame=single]
+
+def daily_filter(line):
+    day_data = line.split(",")[1]
+    if (day_data == day):
+        return True
+    else:
+        return False
+
+for x in range(0, days_range):
+    split_by_day = distFile.filter(third_filter)
+
+\end{lstlisting} 
 
 
 \myparagraph{Uptime per machine}
 
-\begin{algorithm}[H]
- \KwData{Task start and end time}
+The aim for this metric is to find out how long a machine is up. It is a key metric that will be used to calculate optimality factors later on. Algorithm~\ref{alg:uptime_per_machine} represents pseudo code implementation and~\ref{uptime_per_machine_implementation} contains implementation in Python with Apache Spark. 
+
+\begin{algorithm}[h]
+\caption{Uptime per machine}
+\label{alg:uptime_per_machine}
+ \KwData{Task start and end time in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
  \KwResult{Number of uptime hours per machine per day}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+  \begin{algorithmic}[1]
+        \Procedure{map}{$\textrm{Id } key, \textrm{List } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (startTime, endTime))$
+        \EndProcedure
+        \Procedure{reduce for min start time}{$\textrm{Id } key, \textrm{Tuple } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (a < b) ? a : b)$
+        \EndProcedure
+        \Procedure{reduce for max end time}{$\textrm{Id } key, \textrm{Tuple } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (a > b) ? a : b)$
+        \EndProcedure
+  \end{algorithmic}
 \end{algorithm}
 
-Input: Job start and end time logged for each machine in a form of \textless K, List\textless V\textgreater\textgreater
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={uptime_per_machine_implementation},caption={Uptime per machine implementation in Apache Spark},frame=single] 
+min_start = distFile.map(lambda(line): 
+                (line.split(",")[0], line.split(",")[2]))
+                .reduceByKey(lambda a,b: a if a<b else b)
 
-Output: Uptime based on span between min start time and max end time \textless K,V\textgreater
+max_end = distFile.map(lambda(line): 
+                (line.split(",")[0], line.split(",")[3]))
+                .reduceByKey(lambda a,b: a if a>b else b)
+\end{lstlisting}
+\end{minipage}
 
-\myparagraph{Aggregate CPU and memory usage}
-Input: Sampled CPU and memory usage logged per job in a form of \textless K, List\textless V\textgreater\textgreater
+\myparagraph{Aggregated CPU and memory usage}
 
-Output: Aggregated resource usage \textless K,V\textgreater
+Aggregated values of CPU and memory will help to suggest better utilization strategies that guarantee SLOs. Algorithm~\ref{alg:agg_cpu_mem} represents pseudo code implementation and~\ref{agg_cpu_mem_implementation} contains implementation in Python with Apache Spark.
+
+\begin{algorithm}[h]
+\caption{Aggregated CPU and memory}
+\label{alg:agg_cpu_mem}
+ \KwData{CPU and memory usage in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
+ \KwResult{Aggregated CPU and memory usage}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+  \begin{algorithmic}[1]
+        \Procedure{map}{$\textrm{Id } key, \textrm{List } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (cpuUsage, memoryUsage))$
+        \EndProcedure
+        \Procedure{reduce}{$\textrm{Id } key, \textrm{Int } aggValue}$
+                \State $\textsc{Emit}(\textrm{Id }key, a + b)$
+        \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={agg_cpu_mem_implementation},caption={Aggregated CPU and memory implementation in Apache Spark},frame=single] 
+cpu = distFile.map(lambda(line): 
+		(line.split(",")[0], line.split(",")[5]))
+            .reduceByKey(lambda a,b: a + b)
+
+mem = distFile.map(lambda(line): 
+		(line.split(",")[0], line.split(",")[6]))
+            .reduceByKey(lambda a,b: a + b)
+\end{lstlisting}
+\end{minipage}
 
 \myparagraph{Calculate number of jobs per day}
-Input: Job id per machine \textless K, List\textless V\textgreater\textgreater
 
-Output: Job count per machine \textless K,V\textgreater
+Algorithm~\ref{alg:jobs_per_day} represents pseudo code implementation and~\ref{jobs_per_day} contains implementation in Python with Apache Spark.
+
+\begin{algorithm}[h]
+\caption{Daily jobs count}
+\label{alg:agg_cpu_mem}
+ \KwData{Job entry in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
+ \KwResult{Aggregated jobs count}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+  \begin{algorithmic}[1]
+        \Procedure{map}{$\textrm{Id } key, \textrm{List } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, 1)$
+        \EndProcedure
+        \Procedure{reduce}{$\textrm{Id } key, \textrm{Int } aggValue}$
+                \State $\textsc{Emit}(\textrm{Id }key, a + b)$
+        \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={agg_cpu_mem_implementation},caption={Aggregated CPU and memory implementation in Apache Spark},frame=single] 
+def mapping(line):
+    machine_id = line.split(",")[0]
+    counter = 1
+    return (machine_id, counter)
+
+task_counter = distFile.map(mapping).reduceByKey(add)
+\end{lstlisting}
+\end{minipage}
 
 \myparagraph{Calculate cluster averages for aggregations}
 Input: Aggregated CPU, memory and number of tasks per machine per day \textless K, List\textless V\textgreater\textgreater

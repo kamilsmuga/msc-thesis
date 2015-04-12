@@ -377,7 +377,7 @@ def only_uptime_mapping(line):
 for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
     only_uptime = distFile.map(only_uptime_mapping)
-    distinct_uptime = only_uptime.distinct()
+    distinct_uptime = only_up  time.distinct()
     distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
 
 """
