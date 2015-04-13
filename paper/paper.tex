@@ -123,6 +123,7 @@ Cost of running of physical hardware is less straightforward to calculate as it 
 Cost per hour will be defined as \textit{cph}. It includes upfront cost and IaaS provider per hour charges. It is defined as a function of hours of utilization per day.  
 
 \begin{equation}
+\label{eq:cph}
 cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 \end{equation}
 
@@ -226,6 +227,65 @@ max_end = distFile.map(lambda(line):
 \end{lstlisting}
 \end{minipage}
 
+\myparagraph{Cost per hour}
+
+This is an implementation of \textit{cph} metric~\ref{eq:cph} defined in Taxonomy. Algorithm~\ref{alg:cost_per_hour} represents pseudo code and Listing~\ref{cost_per_hour} shows implementation in Python.
+
+\begin{algorithm}[H]
+ \caption{Cost per hour}
+ \label{alg:cost_per_hour}
+ \KwData{Upfront cost, Charge per hour, Uptime [hours per day];}
+ \KwResult{Total cost per hour for a given pricing scheme defined as \textit{cph};}
+ return (upfront + (365 * perhour * hours)) / (365 * hours)
+\end{algorithm}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={cost_per_hour},caption={Uptime per machine implementation in Apache Spark},frame=single] 
+def _calc_cost_per_hour(self, upfront, cost_per_hour, hours_per_day):
+        return (upfront + (365 * cost_per_hour * hours_per_day)) /
+                (365 * hours_per_day)
+\end{lstlisting}
+\end{minipage}
+
+\myparagraph{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+
+\begin{algorithm}[H]
+ \KwData{Array of cph for 2 pricing schemes;}
+ \KwResult{Intersection point when one pricing scheme becomes cheaper than the other one;}
+ read array1\;
+ read array2\;
+ \ForAll{cph in array} {
+ 	\If{$cph2 <= $cph1} {
+ 		return cph
+ 	}
+ }
+\caption{Calculate intersection point between two pricing schemes}
+\end{algorithm}
+
+\myparagraph{Calculate distance from optimality points based on uptime}
+Input: Machine uptime per day
+
+Output: Distance from optimality points. Might be positive or negative. 
+
+\subsection{Recognize inefficiencies and suggest changes}
+
+\myparagraph{Threshold based report}
+
+Generate report of machines based on distance from optimality points. Use customizable threshold. 
+Results from the report will be used to calculate suggestions.
+
+\myparagraph{Visual recognition}
+
+Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
+Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
+
+
+\begin{figure}[H]
+       \includegraphics[width=\linewidth]{figures/cubism}
+      \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
+        \label{fig:cubism}
+\end{figure}
+
 \myparagraph{Aggregated CPU and memory usage}
 
 Aggregated values of CPU and memory will help to suggest better utilization strategies that guarantee SLOs. Algorithm~\ref{alg:agg_cpu_mem} represents pseudo code implementation and~\ref{agg_cpu_mem_implementation} contains implementation in Python with Apache Spark.
@@ -250,11 +310,11 @@ Aggregated values of CPU and memory will help to suggest better utilization stra
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[label={agg_cpu_mem_implementation},caption={Aggregated CPU and memory implementation in Apache Spark},frame=single] 
 cpu = distFile.map(lambda(line): 
-		(line.split(",")[0], line.split(",")[5]))
+                (line.split(",")[0], line.split(",")[5]))
             .reduceByKey(lambda a,b: a + b)
 
 mem = distFile.map(lambda(line): 
-		(line.split(",")[0], line.split(",")[6]))
+                (line.split(",")[0], line.split(",")[6]))
             .reduceByKey(lambda a,b: a + b)
 \end{lstlisting}
 \end{minipage}
@@ -265,7 +325,7 @@ Algorithm~\ref{alg:jobs_per_day} represents pseudo code implementation and~\ref{
 
 \begin{algorithm}[h]
 \caption{Daily jobs count}
-\label{alg:agg_cpu_mem}
+\label{alg:jobs_per_day}
  \KwData{Job entry in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
  \KwResult{Aggregated jobs count}
  \algrenewcommand\algorithmicfunction{\textbf{class}}
@@ -281,7 +341,7 @@ Algorithm~\ref{alg:jobs_per_day} represents pseudo code implementation and~\ref{
 \end{algorithm}
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[label={agg_cpu_mem_implementation},caption={Aggregated CPU and memory implementation in Apache Spark},frame=single] 
+\begin{lstlisting}[label={jobs_per_day},caption={Aggregated CPU and memory implementation in Apache Spark},frame=single] 
 def mapping(line):
     machine_id = line.split(",")[0]
     counter = 1
@@ -291,64 +351,45 @@ task_counter = distFile.map(mapping).reduceByKey(add)
 \end{lstlisting}
 \end{minipage}
 
-\myparagraph{Calculate cluster averages for aggregations}
-Input: Aggregated CPU, memory and number of tasks per machine per day \textless K, List\textless V\textgreater\textgreater
+\myparagraph{Calculate cluster averages}
 
-Output: Averages for CPU, memory and number of tasks \textless K, List\textless V\textgreater\textgreater
+Algorithm~\ref{alg:avg_cluster} represents pseudo code implementation.
 
-\myparagraph{Calculate distance from optimality points based on uptime}
-Input: Machine uptime per day
-
-Output: Distance from optimality points. Might be positive or negative. 
-
-\subsubsection{Calculate cost per hour for a given pricing scheme}
-
-\begin{algorithm}[H]
- \KwData{Upfront cost, Per hour charge, Utilization [hours per day];}
- \KwResult{Total cost per hour for a given pricing scheme defined as \textit{cph};}
- read upfront\;
- read perhour\;
- read hours\;	
- return (upfront + (365 * perhour * hours)) / (365 * hours)
- \caption{Calculate cost per hour for a given pricing scheme}
+\begin{algorithm}[h]
+\caption{}
+\label{alg:avg_cluster}
+ \KwData{Daily CPU, memory usage and task count in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
+ \KwResult{Average CPU, memory usage and task count}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+  \begin{algorithmic}[1]
+        \Procedure{map}{$\textrm{Id } key, \textrm{List } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (value, 1))$
+        \EndProcedure
+        \Procedure{combine}{$\textrm{Id } key, \textrm{List } values}$
+                \State $\textsc{Emit}(\textrm{Id }key, (currentValue + value, counter += 1))$
+        \EndProcedure
+        \Procedure{reduce}{$\textrm{Id } key, \textrm{Int } aggValue}$
+                \State $\textsc{Emit}(\textrm{Id }key, sum / counter)$
+        \EndProcedure
+  \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={avg_cluster},caption={Example code for averages in Apache Spark},frame=single] 
+    sc = SparkContext(appName="avgByKey", conf=SparkConf().set("spark.driver.host", "localhost"))
 
-\begin{algorithm}[H]
- \KwData{Array of cph for 2 pricing schemes;}
- \KwResult{Intersection point when one pricing scheme becomes cheaper than the other one;}
- read array1\;
- read array2\;
- \ForAll{cph in array} {
- 	\If{$cph2 <= $cph1} {
- 		return cph
- 	}
- }
-\caption{Calculate intersection point between two pricing schemes}
-\end{algorithm}
+    data = sc.parallelize( [(0, 2.), (0, 4.), (1, 0.), (1, 10.), (1, 20.)] )
 
+    sumCount = data.combineByKey(lambda value: (value, 1),
+                                 lambda x, value: (x[0] + value, x[1] + 1),
+                                 lambda x, y: (x[0] + y[0], x[1] + y[1]))
 
+    averageByKey = sumCount.map(lambda (label, (value_sum, count)): (label, value_sum / count))
 
-
-\subsection{Recognize inefficiencies and suggest changes}
-
-\subsubsection{Threshold based report}
-
-Generate report of machines based on distance from optimality points. Use customizable threshold. 
-Results from the report will be used to calculate suggestions.
-
-\subsubsection{Visual recognition}
-
-Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
-Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
-
-
-\begin{figure}[H]
-       \includegraphics[width=\linewidth]{figures/cubism}
-      \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
-        \label{fig:cubism}
-\end{figure}
+    print averageByKey.collectAsMap()
+\end{lstlisting}
+\end{minipage}
 
 \subsubsection{Squeeze-them-in suggestion strategy}
 
