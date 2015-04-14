@@ -169,12 +169,12 @@ Metrics should be aggregated in \textless K, List\textless V\textgreater\textgre
 
 \subsection{Metrics data transformations and analytics}
 
-Metrics gathered in Prerequisites section have limited knowledge about environment. Collection per job or per process produces one log line and has scope of a measurement period. Having such structured data would not let to answer machine wide neither cluster wide questions. The data has to be post-processed to allow calculation of below listed aggregations and analytics.   
+Metrics gathered in Prerequisites section have limited knowledge about environment. Collection per job or per process produces one log line and has scope of a measurement period. Such structured data itself would not answer machine wide neither cluster wide questions. The data has to be post-processed to allow calculation of below listed aggregations and analytics.   
 
 \myparagraph{Daily usage}
 
 The data will be analyzed in terms of daily usage. This requires to split metrics into buckets of one day worth of data. 
-It is achieved by applying a simple filter~\ref{daily_usage} in Apache Spark.
+It is achieved by applying a simple filter from Listing~\ref{daily_usage} in Apache Spark.
 
 \begin{lstlisting}[label={daily_usage},caption={Daily usage filter},frame=single]
 
@@ -193,7 +193,7 @@ for x in range(0, days_range):
 
 \myparagraph{Uptime per machine}
 
-The aim for this metric is to find out how long a machine is up. It is a key metric that will be used to calculate optimality factors later on. Algorithm~\ref{alg:uptime_per_machine} represents pseudo code implementation and~\ref{uptime_per_machine_implementation} contains implementation in Python with Apache Spark. 
+The aim for this metric is to find out how long a machine is up. It is a key metric that will be used to calculate optimality factors later on. Algorithm~\ref{alg:uptime_per_machine} represents pseudo code implementation and Listing~\ref{uptime_per_machine_implementation} contains implementation in Python with Apache Spark. 
 
 \begin{algorithm}[h]
 \caption{Uptime per machine}
@@ -247,9 +247,12 @@ def _calc_cost_per_hour(self, upfront, cost_per_hour, hours_per_day):
 \end{lstlisting}
 \end{minipage}
 
-\myparagraph{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
+\myparagraph{Intersection points}
+
+This is an implementation of \textit{ip(scheme1, scheme2)} defined in Taxonomy. This metric will be a reference point that identifies optimality points based on~\textit{cph} for various schemes. Algorithm~\ref{alg:intersection points} represents pseudo code and Listing~\ref{intersection_points} shows implementation in Python. 
 
 \begin{algorithm}[H]
+ \label{alg:intersection points}
  \KwData{Array of cph for 2 pricing schemes;}
  \KwResult{Intersection point when one pricing scheme becomes cheaper than the other one;}
  read array1\;
@@ -262,7 +265,19 @@ def _calc_cost_per_hour(self, upfront, cost_per_hour, hours_per_day):
 \caption{Calculate intersection point between two pricing schemes}
 \end{algorithm}
 
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[label={intersection_points},caption={Intersection point between various pricing schemes},frame=single] 
+def _calc_intersection_point(self, first, second):
+   for i in range(len(first)):
+      if (second[i] <= first[i]):
+         return i
+\end{lstlisting}
+\end{minipage}
+
 \myparagraph{Calculate distance from optimality points based on uptime}
+
+This metric represents either positive or negative value to indicate distance from intersection points calculated 
+
 Input: Machine uptime per day
 
 Output: Distance from optimality points. Might be positive or negative. 
@@ -321,7 +336,7 @@ mem = distFile.map(lambda(line):
 
 \myparagraph{Calculate number of jobs per day}
 
-Algorithm~\ref{alg:jobs_per_day} represents pseudo code implementation and~\ref{jobs_per_day} contains implementation in Python with Apache Spark.
+Number of jobs per day will be a useful parameter to calculate cluster-wide averages used for suggestions. Algorithm~\ref{alg:jobs_per_day} represents pseudo code implementation and~\ref{jobs_per_day} contains implementation in Python with Apache Spark.
 
 \begin{algorithm}[h]
 \caption{Daily jobs count}
