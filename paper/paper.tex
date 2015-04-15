@@ -9,6 +9,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{url}
 \usepackage{listings}             % Include the listings-package
+\usepackage{enumerate}
 
 
 \RestyleAlgo{boxruled}
@@ -274,17 +275,34 @@ def _calc_intersection_point(self, first, second):
 \end{lstlisting}
 \end{minipage}
 
-\myparagraph{Calculate distance from optimality points based on uptime}
+\myparagraph{Uptime Based Distance From Intersection Points}
 
-This metric represents either positive or negative value to indicate distance from intersection points calculated 
+This metric represents distance from intersection points calculated based on uptime. Values can be negative to indicate non-optimal profile or positive otherwise. There are cases when it is better to be either below or above a threshold. It will be specified by flag parameter calculated together with \textit{ip(scheme1, scheme2)} results. Algorithm~\ref{alg:distance_from_optimality} represents pseudo code implementation.
 
-Input: Machine uptime per day
+\begin{algorithm}[H]
+ \label{alg:distance_from_optimality}
+ \KwData{Uptime, Intersection Point, Spin;}
+ \KwResult{Distance from intersection point [-24, 24];}
+  \If{Spin} {
+        return Uptime - Intersection Point
+  } 
+  \Else{
+        return Intersection Point - Uptime
+  }
+\caption{Uptime Based Distance From Intersection Points}
+\end{algorithm}
 
-Output: Distance from optimality points. Might be positive or negative. 
+Example algorithm results
+\begin{enumerate}
+\item Input: Uptime: 24, Optimality Point: 18, Spin: True (more optimal for values above threshold). Output: +6
+\item Input: Uptime: 16, Optimality Point: 18, Spin: True (more optimal for values above threshold). Output: -2
+\item Input: Uptime: 15, Optimality Point: 18, Spin: False (more optimal for values below threshold). Output: +3
+\item Input: Uptime: 19, Optimality Point: 18, Spin: False (more optimal for values below threshold). Output: -1
+\end{enumerate}
 
 \subsection{Recognize inefficiencies and suggest changes}
 
-\myparagraph{Threshold based report}
+\myparagraph{Threshold Based Report}
 
 Generate report of machines based on distance from optimality points. Use customizable threshold. 
 Results from the report will be used to calculate suggestions.
@@ -293,7 +311,6 @@ Results from the report will be used to calculate suggestions.
 
 Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
 Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
-
 
 \begin{figure}[H]
        \includegraphics[width=\linewidth]{figures/cubism}
@@ -407,6 +424,40 @@ Algorithm~\ref{alg:avg_cluster} represents pseudo code implementation.
 \end{minipage}
 
 \subsubsection{Squeeze-them-in suggestion strategy}
+
+The proposed strategy calculates an amount of spare CPU and memory capacity based on cluster-wide averages. Aggregated value for CPU and memory represents an amount of capacity gathered from machines that are utilized below average. Based on the amount of aggregated capacity, algorithm will attempt to squeeze in a maximum amount of machines gathered from Threshold Based Report. As a result, it will propose to turn off a number of machines and guarantee that SLOs will be met.
+This approach performs well when underutilized machines exist. For a well-balanced clusters with similar usage patterns it does not find a lot of spare capacity and would propose fairly limited improvements. 
+
+\begin{algorithm}[h]
+\caption{test}
+\label{alg:squeeze-them-in}
+ \KwData{Cluster averages for CPU and memory, List of machines from Threshold Based Report, List of other machines}
+ \KwResult{List of machines that can be powered down}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+ %\begin{algorithmic}[1]
+
+  %$float spare_cpu;$
+  %$float spare_memory;$
+
+ %  \ForAll{machine in Other Machines} {
+%        \If{$machine.cpu \geq cluster.cpu$} {
+%        \If{a}
+ %              \State test % spare_cpu  cluster.cpu  machine.cpu
+ %        \EndIf
+%        \If{machine.memory < cluster.memory} {
+%                spare_memory += cluster.memory - machine.memory
+%        }
+ %  }
+\ForAll{machine in Other Machines}{
+        \If{$machine.cpu < cluster.cpu$} {
+                 $spare_cpu  clustercpu  machinecpu$
+        }
+        %\EndIf
+}
+%\EndFor
+% \end{algorithmic}
+\end{algorithm}
 
 Input: results of the Threshold based report. 
 
