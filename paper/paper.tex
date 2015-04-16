@@ -277,13 +277,20 @@ def _calc_intersection_point(self, first, second):
 
 \myparagraph{Uptime Based Distance From Intersection Points}
 
-This metric represents distance from intersection points calculated based on uptime. Values can be negative to indicate non-optimal profile or positive otherwise. There are cases when it is better to be either below or above a threshold. It will be specified by flag parameter calculated together with \textit{ip(scheme1, scheme2)} results. Algorithm~\ref{alg:distance_from_optimality} represents pseudo code implementation.
+This metric represents distance from intersection points calculated based on uptime. Result can be negative - indicates non-optimal profile - or positive otherwise. Positive and negative values can be yielded in either direction of time axis as presented on Figure~\ref{fig:distance}. 
+It will be specified by flag parameter calculated together with \textit{ip(scheme1, scheme2)} results. Algorithm~\ref{alg:distance_from_optimality} represents pseudo code implementation.
+
+\begin{figure}[H]
+       \includegraphics[width=\linewidth]{figures/distance}
+      \caption{Distance from intersection points. Positive (green) values indicate optimal result. Negative (red) represent data for further improvement.}
+        \label{fig:distance}
+\end{figure}
 
 \begin{algorithm}[H]
  \label{alg:distance_from_optimality}
- \KwData{Uptime, Intersection Point, Spin;}
+ \KwData{Uptime, Intersection Point, Bias;}
  \KwResult{Distance from intersection point [-24, 24];}
-  \If{Spin} {
+  \If{Bias} {
         return Uptime - Intersection Point
   } 
   \Else{
@@ -294,10 +301,10 @@ This metric represents distance from intersection points calculated based on upt
 
 Example algorithm results
 \begin{enumerate}
-\item Input: Uptime: 24, Optimality Point: 18, Spin: True (more optimal for values above threshold). Output: +6
-\item Input: Uptime: 16, Optimality Point: 18, Spin: True (more optimal for values above threshold). Output: -2
-\item Input: Uptime: 15, Optimality Point: 18, Spin: False (more optimal for values below threshold). Output: +3
-\item Input: Uptime: 19, Optimality Point: 18, Spin: False (more optimal for values below threshold). Output: -1
+\item Input: Uptime: 24, Optimality Point: 18, Bias: True (more optimal for values above threshold). Output: +6
+\item Input: Uptime: 16, Optimality Point: 18, Bias: True (more optimal for values above threshold). Output: -2
+\item Input: Uptime: 15, Optimality Point: 18, Bias: False (more optimal for values below threshold). Output: +3
+\item Input: Uptime: 19, Optimality Point: 18, Bias: False (more optimal for values below threshold). Output: -1
 \end{enumerate}
 
 \subsection{Recognize inefficiencies and suggest changes}
@@ -449,9 +456,12 @@ This approach performs well when underutilized machines exist. For a well-balanc
 %                spare_memory += cluster.memory - machine.memory
 %        }
  %  }
-\ForAll{machine in Other Machines}{
+\ForAll{machine in otherMachines}{
         \If{$machine.cpu < cluster.cpu$} {
-                 $spare_cpu  clustercpu  machinecpu$
+                 $spareCpu += clusterCpu - machineCpu$
+        }
+        \If{$machine.memory < cluster.memory$}{
+        	$spareMemory += clusterMemory - machineMemory$
         }
         %\EndIf
 }
