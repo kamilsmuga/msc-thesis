@@ -436,26 +436,17 @@ The proposed strategy calculates an amount of spare CPU and memory capacity base
 This approach performs well when underutilized machines exist. For a well-balanced clusters with similar usage patterns it does not find a lot of spare capacity and would propose fairly limited improvements. 
 
 \begin{algorithm}[h]
-\caption{test}
+\caption{Squeeze them in suggestion strategy}
 \label{alg:squeeze-them-in}
  \KwData{Cluster averages for CPU and memory, List of machines from Threshold Based Report, List of other machines}
  \KwResult{List of machines that can be powered down}
  \algrenewcommand\algorithmicfunction{\textbf{class}}
  \algrenewcommand\algorithmicprocedure{\textbf{method}}
- %\begin{algorithmic}[1]
 
-  %$float spare_cpu;$
-  %$float spare_memory;$
+  $float spareCpu = 0;$
+  $float spareMemory = 0;$
+  $ID[ ] machinesToExclude;$
 
- %  \ForAll{machine in Other Machines} {
-%        \If{$machine.cpu \geq cluster.cpu$} {
-%        \If{a}
- %              \State test % spare_cpu  cluster.cpu  machine.cpu
- %        \EndIf
-%        \If{machine.memory < cluster.memory} {
-%                spare_memory += cluster.memory - machine.memory
-%        }
- %  }
 \ForAll{machine in otherMachines}{
         \If{$machine.cpu < cluster.cpu$} {
                  $spareCpu += clusterCpu - machineCpu$
@@ -463,19 +454,51 @@ This approach performs well when underutilized machines exist. For a well-balanc
         \If{$machine.memory < cluster.memory$}{
         	$spareMemory += clusterMemory - machineMemory$
         }
-        %\EndIf
 }
-%\EndFor
-% \end{algorithmic}
+
+\ForAll{machine in machinesFromReport}{
+        \If{$(spareCpu - machine.cpu > 0) \&\& (spareMemory - machine.memory > 0)$}{
+                add machine to machinesToExclude;
+        }
+}
+
+\Return machinesToExclude;
+
 \end{algorithm}
 
-Input: results of the Threshold based report. 
-
-Computation: Calculate spare capacity based on average CPU and memory usage. Iterate through a pool of available machines (not included in input report) and advertise available capacity only if CPU and memory usage is lower than average. Aggregate spare capacity results.
-
-Output: List of machines that can be shutdown based on computed spare-capacity.
-
 \subsubsection{New capacity configuration suggestion}
+
+\begin{algorithm}[h]
+\caption{New configuration suggestion}
+\label{alg:new_configuration}
+ \KwData{List of machines from Threshold Based Report, List of available schemes;}
+ \KwResult{List of machines that can be powered down}
+ \algrenewcommand\algorithmicfunction{\textbf{class}}
+ \algrenewcommand\algorithmicprocedure{\textbf{method}}
+
+  $float spareCpu = 0;$
+  $float spareMemory = 0;$
+  $ID[ ] machinesToExclude;$
+
+\ForAll{machine in otherMachines}{
+        \If{$machine.cpu < cluster.cpu$} {
+                 $spareCpu += clusterCpu - machineCpu$
+        }
+        \If{$machine.memory < cluster.memory$}{
+                $spareMemory += clusterMemory - machineMemory$
+        }
+}
+
+\ForAll{machine in machinesFromReport}{
+        \If{$(spareCpu - machine.cpu > 0) \&\& (spareMemory - machine.memory > 0)$}{
+                add machine to machinesToExclude;
+        }
+}
+
+\Return machinesToExclude;
+
+\end{algorithm}
+
 
 Input: results of the Threshold based report.
 
