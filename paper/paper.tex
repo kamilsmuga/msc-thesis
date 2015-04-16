@@ -451,7 +451,7 @@ This approach performs well when underutilized machines exist. For a well-balanc
         \If{$machine.cpu < cluster.cpu$} {
                  $spareCpu += clusterCpu - machineCpu$
         }
-        \If{$machine.memory < cluster.memory$}{
+        \If{$machine.memory < cluster.memory$} {
         	$spareMemory += clusterMemory - machineMemory$
         }
 }
@@ -471,31 +471,29 @@ This approach performs well when underutilized machines exist. For a well-balanc
 \begin{algorithm}[h]
 \caption{New configuration suggestion}
 \label{alg:new_configuration}
- \KwData{List of machines from Threshold Based Report, List of available schemes;}
- \KwResult{List of machines that can be powered down}
+ \KwData{List of machines from Threshold Based Report, List of available schemes, Average number tasks per hour;}
+ \KwResult{New configuration suggestion}
  \algrenewcommand\algorithmicfunction{\textbf{class}}
  \algrenewcommand\algorithmicprocedure{\textbf{method}}
 
-  $float spareCpu = 0;$
-  $float spareMemory = 0;$
-  $ID[ ] machinesToExclude;$
+  $float[ ] totalCost;$
+  $float totalCpu = 0;$
+  $float totalMemory = 0;$
 
-\ForAll{machine in otherMachines}{
+\ForAll{machine in machinesFromReport}{
+        machine.cpu += totalCpu
+        machine.memory += totalMemory
+}
+
+\ForAll{scheme in availableSchemes}{
+		hoursPerDay = scheme.getHours()
         \If{$machine.cpu < cluster.cpu$} {
                  $spareCpu += clusterCpu - machineCpu$
         }
-        \If{$machine.memory < cluster.memory$}{
+        \If{$machine.memory < cluster.memory$} {
                 $spareMemory += clusterMemory - machineMemory$
         }
 }
-
-\ForAll{machine in machinesFromReport}{
-        \If{$(spareCpu - machine.cpu > 0) \&\& (spareMemory - machine.memory > 0)$}{
-                add machine to machinesToExclude;
-        }
-}
-
-\Return machinesToExclude;
 
 \end{algorithm}
 
