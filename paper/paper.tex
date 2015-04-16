@@ -487,6 +487,8 @@ This approach performs well when underutilized machines exist. For a well-balanc
 
 \ForAll{scheme in availableSchemes}{
 		hoursPerDay = scheme.getHours()
+                cpuCap = hoursPerDay * clusterCpuAvgPerHour
+                memCap = hoursPerDay * memoryCpuAvgPerHour
         \If{$machine.cpu < cluster.cpu$} {
                  $spareCpu += clusterCpu - machineCpu$
         }
