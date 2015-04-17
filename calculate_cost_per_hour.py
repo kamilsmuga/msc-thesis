@@ -535,8 +535,8 @@ def cost(line):
 
 def cost_for_heavy(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
-    cpu_cap = splits[4].strip()
-    mem_cap = splits[5].strip()
+    cpu_cap = splits[7].strip()
+    mem_cap = splits[8].strip()
     if cpu_cap != "":
         cpu_cap = float(cpu_cap)
     if mem_cap != "":
@@ -552,11 +552,11 @@ def total_uptime(line):
     return up
 
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-1/*", use_unicode=False)
-cost = distFile.map(cost).reduce(add)
+total_cost = distFile.map(cost).reduce(add)
 heavy_cost = distFile.filter(cost_for_heavy).map(cost).reduce(add)
 total_up = distFile.map(total_uptime).reduce(add)
 
-joined = cost.join(heavy_cost).join(total_up)
+joined = total_cost.join(heavy_cost).join(total_up)
 joined.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-day-1")
 
 """
