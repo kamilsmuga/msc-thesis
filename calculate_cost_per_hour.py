@@ -378,7 +378,7 @@ def only_uptime_mapping(line):
 for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
     only_uptime = distFile.map(only_uptime_mapping)
-    distinct_uptime = only_up  time.distinct()
+    distinct_uptime = only_up time.distinct()
     distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
 
 """
@@ -392,8 +392,14 @@ GET ONLY CPU = 0.5 and MEMORY = (0.5 OR 0.25)
 
 def cpu_and_mem(line):
     splits = line.split(",")
-    cpu = float(splits[4].strip())
-    mem = float(splits[5].strip())
+    try:
+        cpu = float(splits[4])
+    except ValueError:
+        cpu = int(splits[4])
+    try:
+        mem = float(splits[5])
+    except ValueError:
+        mem = int(splits[5])    
 
     if (cpu == 0.5 and (mem == 0.25 or mem == 0.5)):
         return True
