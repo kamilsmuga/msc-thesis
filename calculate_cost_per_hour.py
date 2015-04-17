@@ -338,7 +338,7 @@ Schema after transformation (splitted per day)
 
 
 """
-
+"""
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
     machine_id = splits[0].strip()
@@ -364,6 +364,7 @@ for x in range(0, 30):
     joined_file_distinct.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x))
     day += 1
 """
+"""
 
 GET ONLY UPTIME
 
@@ -381,6 +382,27 @@ for x in range(0, 30):
     distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
 
 """
+
+
+"""
+
+GET ONLY CPU = 0.5 and MEMORY = (0.5 OR 0.25)
+
+"""
+
+def cpu_and_mem(line):
+    splits = line.split(",")
+    cpu = float(splits[4].strip())
+    mem = float(splits[5].strip())
+
+    if (cpu == 0.5 and (mem == 0.25 or mem == 0.5)):
+        return True
+    else:
+        return False
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*", use_unicode=False)
+heavies = distFile.filter(cpu_and_mem)
+heavies.map(lambda x: 1).reduce(add)
 
 """
 --------------------------------------------------------
