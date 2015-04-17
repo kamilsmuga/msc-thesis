@@ -392,14 +392,14 @@ GET ONLY CPU = 0.5 and MEMORY = (0.5 OR 0.25)
 
 def cpu_and_mem(line):
     splits = line.split(",")
-    try:
-        cpu = float(splits[4])
-    except ValueError:
-        cpu = int(splits[4])
-    try:
-        mem = float(splits[5])
-    except ValueError:
-        mem = int(splits[5])    
+    cpu = splits[4]
+    mem = splits[5]
+    
+    if cpu == "" or mem == "":
+        return False
+
+    cpu = float(splits[4])
+    mem = float(splits[5])
 
     if (cpu == 0.5 and (mem == 0.25 or mem == 0.5)):
         return True
