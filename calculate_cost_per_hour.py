@@ -338,7 +338,7 @@ Schema after transformation (splitted per day)
 
 
 """
-"""
+
 def mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
     machine_id = splits[0].strip()
@@ -348,7 +348,7 @@ def mapping(line):
     mem = float(splits[4].strip())
     total_mem = float(splits[5].strip())
     return (machine_id, (uptime, uptime_total, total_cpu, mem, total_mem))
-
+"""
 for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
     basic_forth = distFile.map(mapping)
@@ -512,13 +512,52 @@ def cpu_and_mem(line):
         distance = ip - up
 
     return (mach_id, (up, distance, cost, cpu_usage, memory_usage, tasks, cpu_cap, mem_cap))
-
+"""
 for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x) + "/part*", use_unicode=False)
     heavies = distFile.map(cpu_and_mem)
     heavies.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-" + str(x))
 
+"""
 
+"""" CALC TOTAL COST 
+
+Results:
+1. total cost
+2. total cost for heavy
+3. total cost for medium 
+4. total uptime 
+"""
+def cost(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
+    cost = splits[3].strip()
+    return cost
+
+def cost_for_heavy(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    cpu_cap = splits[4].strip()
+    mem_cap = splits[5].strip()
+    if cpu_cap != "":
+        cpu_cap = float(cpu_cap)
+    if mem_cap != "":
+        mem_cap = float(mem_cap)
+    if (cpu_cap == 0.5 and mem_cap > 0.24):
+        return True
+    else:
+        return False
+
+def total_uptime(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    up = float(splits[1].strip())
+    return up
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-1/*", use_unicode=False)
+cost = distFile.map(cost).reduce(add)
+heavy_cost = distFile.filter(cost_for_heavy).map(cost).reduce(add)
+total_up = distFile.map(total_uptime).reduce(add)
+
+joined = cost.join(heavy_cost).join(total_up)
+joined.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-day-1")
 
 """
 --------------------------------------------------------
