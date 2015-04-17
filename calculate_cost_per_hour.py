@@ -508,14 +508,17 @@ def cpu_and_mem(line):
         distance = up - ip
     else:
         cph = vm.medium_cph[int(up)]
-        cost = cph_m * up
+        cost = cph * up
         distance = ip - up
 
     return (mach_id, (up, distance, cost, cpu_usage, memory_usage, tasks, cpu_cap, mem_cap))
 
-distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-1/*", use_unicode=False)
-heavies = distFile.map(cpu_and_mem)
-heavies.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-1")
+for x in range(0, 30):
+    distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-" + str(x) + "/part*", use_unicode=False)
+    heavies = distFile.map(cpu_and_mem)
+    heavies.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-" + str(x))
+
+
 
 """
 --------------------------------------------------------
