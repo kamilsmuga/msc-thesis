@@ -368,13 +368,15 @@ for x in range(0, 30):
 
 GET ONLY UPTIME
 
+"""
+
 
 def only_uptime_mapping(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
     machine_id = splits[0].strip()
     uptime = float(splits[2].strip()) - float(splits[1].strip())
     return (machine_id, uptime)
-
+"""
 for x in range(0, 30):
     distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-forth-day-" + str(x) + "/part*", use_unicode=False)
     only_uptime = distFile.map(only_uptime_mapping)
@@ -382,33 +384,64 @@ for x in range(0, 30):
     distinct_uptime.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-fifth-uptime-only-day-" + str(x))
 
 """
-
-
 """
 
 GET ONLY CPU = 0.5 and MEMORY = (0.5 OR 0.25)
 
+Schema after transformation (splitted per day)
+        1,machine ID
+        2,uptime (how many hours machine is on)
+        3,distance from optimality point
+        4,total cost per day
+        5,cpu usage
+        6,memory usage
+        7,number of tasks
+        8,MEMORY capacity
+        9,CPU capacity
+
 """
 
+vm = Entity(c_name, c_light, c_medium, c_heavy)
+
 def cpu_and_mem(line):
-    splits = line.split(",")
-    cpu = splits[4]
-    mem = splits[5]
-    
-    if cpu == "" or mem == "":
-        return False
+    ip = vm.i_medium_to_high
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
 
-    cpu = float(splits[4])
-    mem = float(splits[5])
+    mach_id = splits[0].strip()
+    start = float(splits[1].strip())
+    end = float(splits[2].strip())
 
-    if (cpu == 0.5 and (mem == 0.25 or mem == 0.5)):
-        return True
+    cpu_usage = float(splits[3].strip())
+    memory_usage = float(splits[4].strip())
+
+    up = end - start
+
+    cpu_cap = splits[6].strip()
+    mem_cap = splits[7].strip()
+    tasks = splits[8].strip()
+
+    if cpu_cap != "":
+        cpu_cap = float(cpu_cap)
+
+    if mem_cap != "":
+        mem_cap = float(mem_cap)
+
+    cost = 0
+    distance = 0
+    if (cpu_cap == 0.5 and mem_cap > 0.24):
+        cph = vm.heavy_cph[int(up)]
+        cost = cph * up
+        distance = up - ip
     else:
-        return False
+        cph = vm.medium_cph[int(up)]
+        cost = cph_m * up
+        distance = ip - up
 
-distFile = sc.textFile("/Users/ksmuga/workspace/data/clusterdata-2011-2/machine_events/*", use_unicode=False)
-heavies = distFile.filter(cpu_and_mem)
-heavies.map(lambda x: 1).reduce(add)
+    return (mach_id, (up, distance, cost, cpu_usage, memory_usage, tasks, cpu_cap, mem_cap))
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-fifth-day-1/*", use_unicode=False)
+heavies = distFile.map(cpu_and_mem)
+heavies.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-1")
 
 """
 --------------------------------------------------------
