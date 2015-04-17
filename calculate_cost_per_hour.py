@@ -503,11 +503,11 @@ def cpu_and_mem(line):
     cost = 0
     distance = 0
     if (cpu_cap == 0.5 and mem_cap > 0.24):
-        cph = vm.heavy_cph[int(up)]
+        cph = vm.heavy_cph[int(up) - 1]
         cost = cph * up
         distance = up - ip
     else:
-        cph = vm.medium_cph[int(up)]
+        cph = vm.medium_cph[int(up) - 1]
         cost = cph * up
         distance = ip - up
 
