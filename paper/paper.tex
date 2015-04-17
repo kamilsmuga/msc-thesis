@@ -500,13 +500,6 @@ This approach performs well when underutilized machines exist. For well-balanced
 \end{algorithm}
 
 
-%%%%%%%%%%%%%%%%%%%%%%
-%%% IMPLEMENTATION 
-%%%%%%%%%%%%%%%%%%%%%%
-
-\chapter{Implementation}
-
-\emph{/* Implementation quirks related to make it work. Mostly map/reduce jobs written for Apache Spark. */}
 
 %%%%%%%%%%%%%%%%%%%%%%  
 %%% EVALUATION!!!
@@ -518,29 +511,22 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 \emph{/* Evaluation will go through each of Design stages and will perform necessary calculations. Some examples attached below. */}
 
-\subsection{Recognize inefficiencies and suggest changes}
-
-\subsubsection{Threshold based report}
-
-Generate report of machines based on distance from optimality points. Use customizable threshold. 
-Results from the report will be used to calculate suggestions.
-
-\subsubsection{Visual recognition}
-
-
 
 \section{Methodology and setup description}
 
-\section{Algorithm walkthrough}
-\subsection{Calculate cost per hour for a given pricing scheme}
-Results for ccs2.xlarge based on data published for AWS~\cite{AWS:2014} \par
-\csvautotabular{out}
-\subsection{Calculate intersection points to find out the best pricing scheme for a number of hours/day utilization}
-%\includegraphics[width=\linewidth]{cph}
-\subsection{Collect VM usage data}
-\subsection{Group usage metrics by machine}
-\subsection{Calculate number of hours/day, distance from optimality points, CPU and memory utilization}
-\subsection{Suggest changes to the least optimal VMs considering SLAs based on CPU and memory utilization}
+
+\section{Uptime Based Distance From Intersection Points}
+
+Machines in Google Cluster Trace dataset do not have any pricing data attached. For further evaluation purposes, we have to assign example pricing schemes to each virtual machine. 
+
+Total number of machines: 12583
+0.5 and 0.5,0.25 = 10595 = 84.2\% = heavy
+rest = 1988 = 15.8\% = medium
+
+Pricing: cc2.8xlarge
+c_medium = upfront : 4146, perhour : 0.54 
+c_heavy = upfront : 5000, perhour : 0.361
+
 
 \section{Summary}
 
