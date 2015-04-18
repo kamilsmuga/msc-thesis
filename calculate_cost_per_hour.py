@@ -556,8 +556,9 @@ total_cost = distFile.map(cost).reduce(add)
 heavy_cost = distFile.filter(cost_for_heavy).map(cost).reduce(add)
 total_up = distFile.map(total_uptime).reduce(add)
 
-joined = total_cost.join(heavy_cost).join(total_up)
-joined.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-day-1")
+total_cost.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-cost-day-1")
+heavy_cost.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-heavy-cost-day-1")
+total_up.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-uptime-day-1")
 
 """
 --------------------------------------------------------
