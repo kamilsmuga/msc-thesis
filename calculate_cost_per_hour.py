@@ -530,7 +530,7 @@ Results:
 """
 def cost(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")
-    cost = splits[3].strip()
+    cost = float(splits[3].strip())
     return cost
 
 def cost_for_heavy(line):
@@ -551,14 +551,30 @@ def total_uptime(line):
     up = float(splits[1].strip())
     return up
 
-distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-1/*", use_unicode=False)
+def total_distance(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    distance = float(splits[2].strip())
+    return distance  
+"""
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-*/*", use_unicode=False)
 total_cost = distFile.map(cost).reduce(add)
 heavy_cost = distFile.filter(cost_for_heavy).map(cost).reduce(add)
 total_up = distFile.map(total_uptime).reduce(add)
+total_dis = distFile.map(total_distance).reduce(add)
+"""
 
-total_cost.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-cost-day-1")
-heavy_cost.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-heavy-cost-day-1")
-total_up.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh-uptime-day-1")
+def filter_negatives(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    distance = float(splits[2].strip())
+    if distance < 0:
+        return True
+    else:
+        return False
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-*/*", use_unicode=False)
+negatives = distFile.filter(filter_negatives)
+negatives.saveAsTextFile("/Users/ksmuga/workspace/data/out/transformation-seventh")
+
 
 """
 --------------------------------------------------------
