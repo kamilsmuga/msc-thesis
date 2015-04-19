@@ -513,11 +513,14 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 
 \section{Methodology and setup description}
+Tools:
+Apache Spark, Google Data Trace, Workstation
 
 
 \section{Uptime Based Distance From Intersection Points}
 
 Machines in Google Cluster Trace dataset do not have any pricing data attached. For further evaluation purposes, we have to assign example pricing schemes to each virtual machine. 
+Assumption: we take ip(medium, heavy) and assign heavy scheme to cpu and mem of platform B. The rest is medium.
 
 Measurement period = 29 days
 Total number of machines: 12583
@@ -528,16 +531,29 @@ Pricing: cc2.8xlarge
 c_medium = upfront : 4146, perhour : 0.54 
 c_heavy = upfront : 5000, perhour : 0.361
 
+Pricing: m2.4xlarge
+m_medium = upfront : 2604, perhour : 0.52 
+m_heavy = upfront : 3156, perhour : 0.272 
+
+
+\myparagraph{Cluster statistics}
 \begin{center}
-    \begin{tabular}{| l | l | l | l | l | l | l | l |}
+    \begin{tabular}{| l | l | l |}
     \hline
-    Total cost & Cost for heavy & Cost for medium & Total Uptime & Total distance & CPU & Memory & Tasks \\ \hline
-    \$8 177 048 & \$7 479 648 & \$697 400 & 8 705 743h & +3 215 231 & 15972217.38 & 30676363.36 & 1234716525 \\ \hline
+    Indicator & Scheme 1 & Scheme 2 \\
+    \hline
+    Total cost & \$8 177 048 & \$5 637 418 \\
+    \hline
+    KDI & +3 215 231 & +5 431 137 \\
+    \hline
+    Total CPU & 15972217.38 & 15972217.38 \\
+    \hline
+    Total Memory & 30676363.36 & 30676363.36 \\
+    \hline
+    Number of tasks & 1234716525 & 1234716525 \\
+    \hline
     \end{tabular}
 \end{center}
-
-Cost per task = \$8 177 048 / 1234716525 = \$0.00662261161525
-cost per hour = \$8 177 048 / 8 705 743 = 0.93927054818871
 
 \section{Recognize inefficiencies and suggest changes}
 
@@ -545,17 +561,23 @@ cost per hour = \$8 177 048 / 8 705 743 = 0.93927054818871
 
 The report will filter all machines that reported non-optimal - negative distance from intersection point - configuration during measurement period (29 days).
 
+\myparagraph{Scheme 1}
 Number of machines to tune: 932
 CPU capacity to accommodate: 1 320 781.36
 Memory capacity to accommodate: 4 286 742.06
 Number of tasks to execute: 118869614
 Cost of running non-optimal machines: \$657 200
-Cost of heavy: \$29.56
-Cost of medium: \$657 170.44
 Total uptime: 648519
 cost per hour = \$1.01338588383687
 Cost per task =  \$657 200 / 118869614 = \$0.00552874681666
 
+\myparagraph{Scheme 2}
+Number of machines to tune: 937
+CPU capacity to accommodate: 1 327 202.18
+Memory capacity to accommodate: 4 303 983.31
+Number of tasks to execute: 119367988
+Cost of running non-optimal machines: \$532 840.76
+Total uptime: 651899
 
 \myparagraph{Calculate cluster averages}
 
@@ -565,6 +587,7 @@ Avg tasks number per machine = 1234716525/12583 = 98125.77/29 = 3383.65
 
 \myparagraph{Squeeze-them-in suggestion strategy}
 
+\myparagraph{Scheme 1}
 total spare cpu = 3 697 171.44
 total spare mem = 6 685 407.83
 total distance: +3 500 037
@@ -577,6 +600,38 @@ new averages
 cpu per machine = 15972217.38/11651 = 1370.88 / 29 = 47.27
 Avg mem usage per machine = 30676363.36/11651 = 2632.94/29 = 90.79
 Avg tasks number per machine = 1234716525/11651 = 105975.15/29 = 3654.31
+
+\myparagraph{Scheme 2}
+total spare cpu = 3 694 240.56 
+total spare mem = 6 682 956.59
+total distance: +3 501 467
+total uptime = 8053221
+
+\myparagraph{New capacity configuration suggestion}
+
+Input 
+
+c_name = cc2.8xlarge
+c_light = "upfront" : "1762", "perhour" : "0.904" 
+c_medium =  "upfront" : "4146", "perhour" : "0.54" 
+c_heavy =  "upfront" : "5000", "perhour" : "0.361" 
+
+# values for size: m2.4xlarge region: us-east
+# 1 year reservation
+m_name = 'm2.4xlarge'
+m_light =  "upfront" : "1088", "perhour" : "0.676" 
+m_medium =  "upfront" : "2604", "perhour" : "0.52" 
+m_heavy =  "upfront" : "3156", "perhour" : "0.272" 
+
+
+
+vm1 = Entity(c_name, c_light, c_medium, c_heavy)
+vm2 = Entity(m_name, m_light, m_medium, m_heavy)
+
+>>> calc_options(uptime, vm2, 29)
+(1597, 3727, 972, 567 273.49, 998 186.23, 410 041.68)
+>>> calc_options(uptime, vm1, 29)
+(1397, 1720, 972, 770 417.58, 876 376.34, 604 274.61)
 
 
 \section{Summary}
