@@ -519,6 +519,7 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 Machines in Google Cluster Trace dataset do not have any pricing data attached. For further evaluation purposes, we have to assign example pricing schemes to each virtual machine. 
 
+Measurement period = 29 days
 Total number of machines: 12583
 0.5 and 0.5,0.25 = 10595 = 84.2\% = heavy
 rest = 1988 = 15.8\% = medium
@@ -526,6 +527,56 @@ rest = 1988 = 15.8\% = medium
 Pricing: cc2.8xlarge
 c_medium = upfront : 4146, perhour : 0.54 
 c_heavy = upfront : 5000, perhour : 0.361
+
+\begin{center}
+    \begin{tabular}{| l | l | l | l | l | l | l | l |}
+    \hline
+    Total cost & Cost for heavy & Cost for medium & Total Uptime & Total distance & CPU & Memory & Tasks \\ \hline
+    \$8 177 048 & \$7 479 648 & \$697 400 & 8 705 743h & +3 215 231 & 15972217.38 & 30676363.36 & 1234716525 \\ \hline
+    \end{tabular}
+\end{center}
+
+Cost per task = \$8 177 048 / 1234716525 = \$0.00662261161525
+cost per hour = \$8 177 048 / 8 705 743 = 0.93927054818871
+
+\section{Recognize inefficiencies and suggest changes}
+
+\myparagraph{Threshold Based Report}
+
+The report will filter all machines that reported non-optimal - negative distance from intersection point - configuration during measurement period (29 days).
+
+Number of machines to tune: 932
+CPU capacity to accommodate: 1 320 781.36
+Memory capacity to accommodate: 4 286 742.06
+Number of tasks to execute: 118869614
+Cost of running non-optimal machines: \$657 200
+Cost of heavy: \$29.56
+Cost of medium: \$657 170.44
+Total uptime: 648519
+cost per hour = \$1.01338588383687
+Cost per task =  \$657 200 / 118869614 = \$0.00552874681666
+
+
+\myparagraph{Calculate cluster averages}
+
+Avg cpu usage per machine = 15972217.38/12583 = 1269.35/29 = 43.77
+Avg mem usage per machine = 30676363.36/12583 = 2437.92/29 = 84.06
+Avg tasks number per machine = 1234716525/12583 = 98125.77/29 = 3383.65
+
+\myparagraph{Squeeze-them-in suggestion strategy}
+
+total spare cpu = 3 697 171.44
+total spare mem = 6 685 407.83
+total distance: +3 500 037
+total uptime = 8056601
+cost per hour = \$7 519 848 / 8056601 = 0.93337723935938
+new total cost = \$8 177 048 - \$657 200 = \$7 519 848
+new cost per task = \$7 519 848 / 1234716525 = 0.00609034369245
+
+new averages 
+cpu per machine = 15972217.38/11651 = 1370.88 / 29 = 47.27
+Avg mem usage per machine = 30676363.36/11651 = 2632.94/29 = 90.79
+Avg tasks number per machine = 1234716525/11651 = 105975.15/29 = 3654.31
 
 
 \section{Summary}

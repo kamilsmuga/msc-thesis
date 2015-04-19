@@ -577,6 +577,9 @@ total_cost = distFile.map(cost).reduce(add)
 heavy_cost = distFile.filter(cost_for_heavy).map(cost).reduce(add)
 total_up = distFile.map(total_uptime).reduce(add)
 total_dis = distFile.map(total_distance).reduce(add)
+cpu = distFile.map(total_cpu).reduce(add)
+mem = distFile.map(total_mem).reduce(add)
+tasks = distFile.map(total_tasks).reduce(add)
 """
 
 
@@ -616,6 +619,41 @@ def filter_for_stats(line):
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-seventh/*", use_unicode=False)
 stats = distFile.filter(filter_for_stats)
 
+
+"""
+squeeze them in!
+
+"""
+
+def filter_for_other(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    m_id = int(splits[0].strip())
+    if m_id in negatives_ids:
+        return False
+    else:
+        return True
+
+def filter_for_squeeze_cpu(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    cpu = float(splits[4].strip())
+    if cpu < 43.77:
+        return 43.77 - cpu
+    else:
+        return 0
+
+def filter_for_squeeze_mem(line):
+    splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
+    mem = float(splits[5].strip())
+    if mem < 84.06:
+        return 84.06 - mem
+    else:
+        return 0
+
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-*/*", use_unicode=False)
+total_spare_cpu = distFile.filter(filter_for_other).map(filter_for_squeeze_cpu).reduce(add)
+total_spare_mem = distFile.filter(filter_for_other).map(filter_for_squeeze_mem).reduce(add)
+total_distance = distFile.filter(filter_for_other).map(total_distance).reduce(add)
+total_up = distFile.filter(filter_for_other).map(total_uptime).reduce(add)
 
 """
 --------------------------------------------------------
