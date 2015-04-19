@@ -582,8 +582,6 @@ mem = distFile.map(total_mem).reduce(add)
 tasks = distFile.map(total_tasks).reduce(add)
 """
 
-
-
 def filter_negatives(line):
     splits = line.replace("\"","").replace("(", "").replace(")", "").replace("\'","").split(",")    
     distance = float(splits[2].strip())
@@ -615,10 +613,10 @@ def filter_for_stats(line):
         return True
     else:
         return False
-
+"""
 distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-seventh/*", use_unicode=False)
 stats = distFile.filter(filter_for_stats)
-
+"""
 
 """
 squeeze them in!
@@ -654,6 +652,39 @@ total_spare_cpu = distFile.filter(filter_for_other).map(filter_for_squeeze_cpu).
 total_spare_mem = distFile.filter(filter_for_other).map(filter_for_squeeze_mem).reduce(add)
 total_distance = distFile.filter(filter_for_other).map(total_distance).reduce(add)
 total_up = distFile.filter(filter_for_other).map(total_uptime).reduce(add)
+
+
+"""
+New configuration suggestion
+
+  $float[ ] totalCost;$
+  $float totalCpu = 0;$
+  $float totalMemory = 0;$
+
+\ForAll{machine in machinesFromReport} {
+    machine.cpu += totalCpu;
+    machine.memory += totalMemory;
+}
+
+\ForAll{scheme in availableSchemes} {
+    hoursPerDay = scheme.getHours();
+    cpuCap = hoursPerDay * clusterCpuAvgPerHour;
+    memCap = hoursPerDay * memoryCpuAvgPerHour;
+
+    vmsReqCpu = totalCpu / cpuCap;
+    vmsReqMem = totalMemory / memCap;
+
+    totalCost[scheme] = min(vmsReqCpu, vmsReqMem) * scheme.cph;
+}
+
+\Return{min(totalCost)}
+
+"""
+distFile = sc.textFile("/Users/ksmuga/workspace/data/out/transformation-sixth-day-*/*", use_unicode=False)
+distFile.filter(filter_for_stats).map(total_cpu)
+distFile.filter(filter_for_stats).map(total_mem)
+
+
 
 """
 --------------------------------------------------------
