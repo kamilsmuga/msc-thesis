@@ -509,15 +509,111 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 \chapter{Evaluation}
 
-\emph{/* Evaluation will go through each of Design stages and will perform necessary calculations. Some examples attached below. */}
+\section{Methodology}
+
+Evaluation process can be splitted into four phases:
+\begin{enumerate}
+\item collection and transformation of pricing and usage data,
+\item calculation of key indicators (\textit{cph, ip(scheme1, scheme2), KDI}) and cluster characteristics (\textit{total cost, performance averages}), 
+\item suggestion of changes based on Algorithm~\ref{alg:squeeze-them-in} and~\ref{alg:new_configuration},
+\item validation of positive correlation between \textit{KDI} and \textit{total cost} changes.
+\end{enumerate}
+
+\section{Setup description}
+
+\myparagraph{Workstation}
+Hardware - Intel Xeon 6-core x86\_64 2.4GHz, L3 cache 24MB, RAM 28GB. \\
+Operating System - OS X Yosemite 10.10.2
+
+\myparagraph{Platform}
+Apache Spark 1.2.1\footnote{\url{https://spark.apache.org}} - an engine for large-scale data processing. All of map reduce jobs were written using Python API. Jobs were executed using standalone cluster mode with settings specified in Table~\ref{tab:spark_conf}. Job run times varied widely based on input data size and complexity of computations - from 20hs+ for transformations on 100G+ data to 1 minute aggregations on 100-200M input.
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    \textbf{Setting name} & \textbf{Value} \\
+    \hline
+    spark.master & local \\
+    \hline
+    spark.driver.memory & 8G \\
+    \hline
+    spark.executor.memory & 20G \\
+    \hline
+    spark.default.parallelism & 500 \\
+    \hline
+    \end{tabular}
+\end{center}
+\label{tab:spark_conf}
+\caption{Apache Spark standalone cluster configuration settings}
+\end{table}
+
+Settings were tweaked during computation mostly due to frequent Out Of Memory errors. Default driver and executor settings - 256M and 512M respectively - were not enough to handle the volume of input data. Further OOMs occurred during \textit{RRD.reduceByKey}\footnote{\url{https://spark.apache.org/docs/1.2.1/api/python/pyspark.html#pyspark.RDD.reduceByKey}} operations as it required to compute a fairly large hash map. Tweaks of \textit{spark.default.parallelism} setting worked the best as it enforced more granular input data chunking.
+
+\section{Input data}
+
+\myparagraph{Pricing data}
+
+Amazon Web Services\footnote{\url{http://aws.amazon.com/}} offered variable pricing schemes based on uptime. Customer could choose an instance configuration and total cost would be calculated based on a number of hours of uptime per day.
+The offering was splitted into three options:
+\begin{enumerate}
+\item light - low upfront and high per hour cost,
+\item medium - medium upfront and medium per hour cost,
+\item heavy - high upfront and low per hour cost.
+\end{enumerate}
+
+For evaluation purposes we choose two pricing schemes for two different VM configurations~\cite{AWS:2014}. Pricing details are specified in Table~\ref{tab:aws_pricing}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Name} & \textbf{Scheme} & \textbf{Upfront (\$)} & \textbf{Per hour (\$)} \\
+    \hline
+    cc2.8xlarge & light & 1762 & 0.904 \\
+    \hline
+    cc2.8xlarge & medium & 4146 & 0.54 \\
+    \hline
+    cc2.8xlarge & heavy & 5000 & 0.361 \\
+    \hline
+    m2.4xlarge & light & 1088 & 0.676 \\
+    \hline
+    m2.4xlarge & medium & 2604 & 0.52 \\
+    \hline
+    m2.4xlarge & heavy & 3156 & 0.272 \\
+    \hline
+    \end{tabular}
+\end{center}
+\label{tab:aws_pricing}
+\caption{AWS pricing for reserved cc2.8xlarge and m2.4xlarge instances}
+\end{table}
 
 
-\section{Methodology and setup description}
-Tools:
-Apache Spark, Google Data Trace, Workstation
+Pricing: m2.4xlarge
+m_light =  upfront : 1088, perhour : 0.676
+m_medium = upfront : 2604, perhour : 0.52 
+m_heavy = upfront : 3156, perhour : 0.272 
 
 
-\section{Uptime Based Distance From Intersection Points}
+\myparagraph{Usage data}
+
+
+\section{Calculate cph and ip}
+
+\section{Transform initial Google data schema to below per day}
+
+Schema after transformation (splitted per day)
+        1,machine ID,INTEGER,YES
+        2,uptime (how many hours machine is on),INTEGER,YES
+        3,uptime based on summarized task time,INTEGER,YES
+        4,total CPU usage,INTEGER,YES
+        5,CPU capacity, INTEGER, YES
+        6,total assigned memory usage,FLOAT,NO
+        7,total maximum memory usage,FLOAT,NO
+        8,MEMORY capacity,FLOAT,YES
+        9,NUMBER of tasks per machine per day
+
+\section{Calculate KDI and total cost on google trace data }
 
 Machines in Google Cluster Trace dataset do not have any pricing data attached. For further evaluation purposes, we have to assign example pricing schemes to each virtual machine. 
 Assumption: we take ip(medium, heavy) and assign heavy scheme to cpu and mem of platform B. The rest is medium.
@@ -527,13 +623,7 @@ Total number of machines: 12583
 0.5 and 0.5,0.25 = 10595 = 84.2\% = heavy
 rest = 1988 = 15.8\% = medium
 
-Pricing: cc2.8xlarge
-c_medium = upfront : 4146, perhour : 0.54 
-c_heavy = upfront : 5000, perhour : 0.361
 
-Pricing: m2.4xlarge
-m_medium = upfront : 2604, perhour : 0.52 
-m_heavy = upfront : 3156, perhour : 0.272 
 
 
 \myparagraph{Cluster statistics}
@@ -555,9 +645,14 @@ m_heavy = upfront : 3156, perhour : 0.272
     \end{tabular}
 \end{center}
 
-\section{Recognize inefficiencies and suggest changes}
+\myparagraph{Cluster SLO averages}
 
-\myparagraph{Threshold Based Report}
+Avg cpu usage per machine = 15972217.38/12583 = 1269.35/29 = 43.77
+Avg mem usage per machine = 30676363.36/12583 = 2437.92/29 = 84.06
+Avg tasks number per machine = 1234716525/12583 = 98125.77/29 = 3383.65
+
+
+\section{Recognize inefficiencies with Threshold-based Report}
 
 The report will filter all machines that reported non-optimal - negative distance from intersection point - configuration during measurement period (29 days).
 
@@ -579,51 +674,44 @@ Number of tasks to execute: 119367988
 Cost of running non-optimal machines: \$532 840.76
 Total uptime: 651899
 
-\myparagraph{Calculate cluster averages}
 
-Avg cpu usage per machine = 15972217.38/12583 = 1269.35/29 = 43.77
-Avg mem usage per machine = 30676363.36/12583 = 2437.92/29 = 84.06
-Avg tasks number per machine = 1234716525/12583 = 98125.77/29 = 3383.65
-
-\myparagraph{Squeeze-them-in suggestion strategy}
+\section{Squeeze-them-in suggestion strategy}
 
 \myparagraph{Scheme 1}
 total spare cpu = 3 697 171.44
 total spare mem = 6 685 407.83
-total distance: +3 500 037
+new KDI: +3 500 037
+old KDI: +3 215 231
+KDI change: +8.14\%
 total uptime = 8056601
-cost per hour = \$7 519 848 / 8056601 = 0.93337723935938
 new total cost = \$8 177 048 - \$657 200 = \$7 519 848
-new cost per task = \$7 519 848 / 1234716525 = 0.00609034369245
+cost change: -8.04\%
+cost per hour = \$7 519 848 / 8056601 = 0.93337723935938
+new cost per task = \$7 519 848 / 118869614 = 0.06326131419927
 
 new averages 
-cpu per machine = 15972217.38/11651 = 1370.88 / 29 = 47.27
-Avg mem usage per machine = 30676363.36/11651 = 2632.94/29 = 90.79
-Avg tasks number per machine = 1234716525/11651 = 105975.15/29 = 3654.31
+cpu per machine = 15972217.38/11651 = 1370.88 / 29 = 47.27 +7.4\%
+Avg mem usage per machine = 30676363.36/11651 = 2632.94/29 = 90.79 +7.41\%
+Avg tasks number per machine = 1234716525/11651 = 105975.15/29 = +7.4\%
 
 \myparagraph{Scheme 2}
 total spare cpu = 3 694 240.56 
 total spare mem = 6 682 956.59
-total distance: +3 501 467
+new KDI: +5 913 933
+old KDI: +5 431 137
+KDI change: +8.16\%
 total uptime = 8053221
+new total cost = \$5 637 418 - \$532 840.76 = \$5 104 577.24
+cost change: -9.45\%
+cost per hour = \$5 104 577.24 / 8053221 = 0.63385535303204
+new cost per task = \$5 104 577.24 / 119367988 = 0.04276336834964
 
-\myparagraph{New capacity configuration suggestion}
+new averages 
+cpu per machine = 15972217.38/11646 = 1371.48 / 29 = 47.29 +7.44\%
+Avg mem usage per machine = 30676363.36/11646 = 2634.07 / 29 = 90.83 +7.45\%
+Avg tasks number per machine = 1234716525/11646 = 106020.65 / 29 = 3655.88 +7.45\%
 
-Input 
-
-c_name = cc2.8xlarge
-c_light = "upfront" : "1762", "perhour" : "0.904" 
-c_medium =  "upfront" : "4146", "perhour" : "0.54" 
-c_heavy =  "upfront" : "5000", "perhour" : "0.361" 
-
-# values for size: m2.4xlarge region: us-east
-# 1 year reservation
-m_name = 'm2.4xlarge'
-m_light =  "upfront" : "1088", "perhour" : "0.676" 
-m_medium =  "upfront" : "2604", "perhour" : "0.52" 
-m_heavy =  "upfront" : "3156", "perhour" : "0.272" 
-
-
+\section{New capacity configuration suggestion}
 
 vm1 = Entity(c_name, c_light, c_medium, c_heavy)
 vm2 = Entity(m_name, m_light, m_medium, m_heavy)
@@ -633,6 +721,7 @@ vm2 = Entity(m_name, m_light, m_medium, m_heavy)
 >>> calc_options(uptime, vm1, 29)
 (1397, 1720, 972, 770 417.58, 876 376.34, 604 274.61)
 
+\section{Validate influence of suggestions and correlation with KDI}
 
 \section{Summary}
 
@@ -662,7 +751,7 @@ vm2 = Entity(m_name, m_light, m_medium, m_heavy)
 \begin{thebibliography}{99}
 \bibitem{spark} https://spark.apache.org
 \bibitem{googleTrace} https://code.google.com/p/googleclusterdata
-\bibitem{AWS:2014} http://forecastcloudy.net/2012/04/02/amazon-web-services-aws-ec2-pricing-data/ https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json
+\bibitem{AWS:2014} Access: Apr 20th, 2015, https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json
 \end{thebibliography}
 \label{endpage}
 
