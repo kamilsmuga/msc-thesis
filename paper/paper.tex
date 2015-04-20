@@ -81,7 +81,7 @@ Modelling and experimentation
 \textbf{Design}. This section explains design and environment conditions for the algorithm to be useful. \par
 \textbf{Implementation}. This section explains algorithm implementation details and data analytics software that was used - Apache Spark\footnote{\url{https://spark.apache.org}}. \par
 \textbf{Evaluation}. The proposed algorithmic approach is applied to Google Trace data~\cite{clusterdata:Reiss2011}. \par
-\textbf{Conclusion and Further Work}. The completed data analysis is discussed. Further work related to algorithm improvements, automation and lessons learned are presented. 
+\textbf{Conclusion and Future Work}. The completed data analysis is discussed. Further work related to algorithm improvements, automation and lessons learned are presented. 
  
 \newpage
 
@@ -546,8 +546,8 @@ Apache Spark 1.2.1\footnote{\url{https://spark.apache.org}} - an engine for larg
     \hline
     \end{tabular}
 \end{center}
+\caption{Apache Spark standalone cluster configuration settings} 
 \label{tab:spark_conf}
-\caption{Apache Spark standalone cluster configuration settings}
 \end{table}
 
 Settings were tweaked during computation mostly due to frequent Out Of Memory errors. Default driver and executor settings - 256M and 512M respectively - were not enough to handle the volume of input data. Further OOMs occurred during \textit{RRD.reduceByKey}\footnote{\url{https://spark.apache.org/docs/1.2.1/api/python/pyspark.html#pyspark.RDD.reduceByKey}} operations as it required to compute a fairly large hash map. Tweaks of \textit{spark.default.parallelism} setting worked the best as it enforced more granular input data chunking.
@@ -586,17 +586,164 @@ For evaluation purposes we choose two pricing schemes for two different VM confi
     \hline
     \end{tabular}
 \end{center}
-\label{tab:aws_pricing}
 \caption{AWS pricing for reserved cc2.8xlarge and m2.4xlarge instances}
+\label{tab:aws_pricing}
 \end{table}
 
 \myparagraph{Usage data}
-Google released 29 day cluster usage traces of more than 12k machines running over 650k jobs~\cite{clusterdata:Reiss2011}. As analyzed in ~\cite{clusterdata:Reiss2012b} 
 
+Google released 29-day cluster usage traces of more than 12k machines running over 650k jobs~\cite{clusterdata:Reiss2011}. An analysis~\cite{clusterdata:Reiss2012b} revealed that the workload is heterogeneous, which is somewhat unique compared to other traces and makes a good fit for testing.
+The trace contains data about jobs submitted by users. Each job is made of tasks. Each task reports metrics about resource consumption - e.g. CPU, memory - and timestamps. The trace does not contain information about the purpose of the jobs, which limits SLO assumptions to resource utilization. 
+Resource utilization data is provided in normalized units - the strongest configuration is 1 and the rest of configurations are described in relation to that value.
 
 \myparagraph{Pricing assignment to usage data}
 
-\section{Calculate cph and ip}
+Google trace does not provide any information about pricing schemes of included machines. For evaluation purposes, we will produce example configurations of different pricing schemes that could exist within a real cluster. 
+
+The majority of machines within Google cluster i.e. 82\%, have following configuration: 0.5 CPU, 0.5 RAM or 0.5 CPU, 0.25 RAM. We will assign heavy pricing scheme for these machines. For the rest of the cluster, we will assign medium pricing scheme. 
+
+The light scheme is a good fit for relatively short periods of time, e.g. during peak. An analysis of the trace~\cite{clusterdata:Reiss2012b} shows that jobs with the highest peak-to-mean ratio are production priority jobs and they constitute only 7\% of all jobs. Therefore, we will not assign any light pricing schemes for this evaluation purposes. 
+
+We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \textit{Scheme 1} and \textit{Scheme 2}.  
+ 
+\section{Pricing data indicators}
+
+\subsection{Cost per hour}
+\myparagraph{Scheme1}
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Hour} & \textbf{Light (price/hour)} & \textbf{Medium (price/hour)} & \textbf{Heavy (price/hour)} \\
+    \hline
+	1&5.7313972602739724&11.898904109589042&14.059630136986302 \\
+    \hline
+	2&3.317698630136986&6.2194520547945205&7.21031506849315 \\
+    \hline
+	3&2.513132420091324&4.326301369863014&4.9272100456621 \\
+    \hline
+	4&2.110849315068493&3.3797260273972602&3.785657534246575 \\    
+	\hline
+5&1.8694794520547946&2.811780821917808&3.1007260273972603 \\
+	\hline
+6&1.7085662100456622&2.433150684931507&2.64410502283105 \\
+	\hline 
+7&1.593628180039139&2.162700587084149&2.317947162426614 \\
+\hline 
+8&1.5074246575342467&1.9598630136986301&2.0733287671232876 \\
+\hline
+9&1.4403774733637749&1.8021004566210044&1.8830700152207003 \\
+\hline
+10&1.3867397260273973&1.6758904109589041&1.73086301369863 \\ 
+\hline
+11&1.342854296388543&1.5726276463262765&1.6063300124533002 \\ 
+\hline
+12&1.3062831050228312&1.4865753424657535&1.5025525114155251 \\
+\hline
+13&1.2753382507903057&1.4137618545837725&1.414740779768177 \\
+\hline
+14&1.2488140900195697&1.3513502935420745&1.3394735812133072 \\
+\hline
+15&1.2258264840182649&1.2972602739726027&1.2742420091324203 \\
+\hline
+16&1.2057123287671234&1.249931506849315&1.2171643835616437 \\
+\hline
+17&1.1879645447219984&1.208170829975826&1.1668017727639 \\
+\hline
+18&1.1721887366818875&1.1710502283105022&1.12203500761035 \\ 
+\hline
+19&1.1580735400144198&1.1378370583994233&1.0819805335255948 \\
+\hline
+20&1.1453698630136988&1.107945205479452&1.045931506849315 \\
+\hline
+21&1.1338760600130462&1.0809001956947162&1.0133157208088714 \\
+\hline
+22&1.1234271481942715&1.0563138231631384&0.9836650062266501 \\
+\hline
+23&1.1138868374032165&1.0338653960690887&0.9565926146515782 \\ 
+\hline
+24&1.1051415525114157&1.0132876712328769&0.9317762557077626 \\ 
+    \hline
+    \end{tabular}
+\end{center}
+\caption{cph results for cc2.8xlarge reserved instance}
+\label{tab:cph:scheme1}
+\end{table}
+
+\myparagraph{Scheme2}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l | l |}
+    \hline
+    \textbf{Hour} & \textbf{Light (price/hour)} & \textbf{Medium (price/hour)} & \textbf{Heavy (price/hour)} \\
+    \hline
+1&3.656821917808219&7.654246575342467&8.918575342465754\\ 
+ \hline 
+2&2.1664109589041094&4.087123287671233&4.595287671232876\\ 
+ \hline 
+3&1.669607305936073&2.898082191780822&3.1541917808219178\\ 
+ \hline 
+4&1.4212054794520548&2.303561643835616&2.4336438356164383\\ 
+ \hline 
+5&1.2721643835616436&1.9468493150684931&2.0013150684931507\\ 
+ \hline 
+6&1.1728036529680366&1.709041095890411&1.713095890410959\\ 
+ \hline 
+7&1.1018317025440314&1.5391780821917809&1.5072250489236791\\ 
+ \hline 
+8&1.0486027397260274&1.411780821917808&1.352821917808219\\ 
+ \hline 
+9&1.0072024353120244&1.3126940639269407&1.2327305936073059\\ 
+ \hline 
+10&0.9740821917808219&1.2334246575342467&1.1366575342465755\\ 
+ \hline 
+11&0.9469838107098382&1.1685678704856788&1.058052303860523\\ 
+ \hline 
+12&0.9244018264840183&1.1145205479452056&0.9925479452054796\\ 
+ \hline 
+13&0.9052939936775553&1.0687881981032665&0.9371211801896734\\ 
+ \hline 
+14&0.8889158512720158&1.0295890410958906&0.8896125244618396\\ 
+ \hline 
+15&0.8747214611872147&0.9956164383561644&0.8484383561643836\\ 
+ \hline 
+16&0.8623013698630138&0.9658904109589042&0.8124109589041095\\ 
+ \hline 
+17&0.8513424657534246&0.9396615632554393&0.7806220789685737\\ 
+ \hline 
+18&0.8416012176560121&0.9163470319634702&0.7523652968036529\\ 
+ \hline 
+19&0.8328853640951694&0.8954866618601299&0.7270829127613554\\ 
+ \hline 
+20&0.825041095890411&0.8767123287671232&0.7043287671232877\\ 
+ \hline 
+21&0.8179439008480104&0.8597260273972603&0.6837416829745597\\ 
+ \hline 
+22&0.8114919053549191&0.8442839352428394&0.6650261519302615\\ 
+ \hline 
+23&0.8056009529481835&0.8301846337105421&0.6479380583680763\\ 
+ \hline 
+24&0.8002009132420091&0.8172602739726028&0.6322739726027398 \\
+ \hline 
+
+    \end{tabular}
+\end{center}
+\caption{cph results for m2.4xlarge reserved instance}
+\label{tab:cph:scheme1}
+\end{table}
+
+\subsection{Intersection points}
+\myparagraph{Scheme1}
+Intersection points:
+Light/medium : 17
+Medium/heavy : 13
+Light / heavy : 16
+\myparagraph{Scheme2}
+Intersection points:
+Light/medium : Never (surprisingly medium is never cheaper than light)
+Medium/heavy : 6
+Light / heavy : 14
 
 \section{Transform initial Google data schema to below per day}
 
@@ -723,23 +870,22 @@ vm2 = Entity(m_name, m_light, m_medium, m_heavy)
 
 \section{Summary}
 
-%%%%%%%%%%%%%%%%%%%%%%
-%%% OPTIONAL!!!
-%%% CAPACITY PLANNING 
-%%% STRATEGIES    
-%%%%%%%%%%%%%%%%%%%%%%
-
-%\chapter{Capacity Planning Strategies}
-
-%\section{Peak-to-mean ratio based resource assignment}
-
-%\section{Only heavy instances}
 
 %%%%%%%%%%%%%%%%%%%%%%
-%%% CONCLUSION 
+%%% CONCLUSION AND 
+%%% FUTURE WORK
 %%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Conclusion and Future Work}
+
+\myparagraph{Conclusion}
+It works and is great!
+
+\myparagraph{Future Work}
+\begin{enumerate}
+\item Visual recognition of underperforming machines
+\item Prediction trend to generate suggestions
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% REFERENCES 
