@@ -10,6 +10,8 @@
 \usepackage{url}
 \usepackage{listings}             % Include the listings-package
 \usepackage{enumerate}
+\usepackage{cite}
+
 
 
 \RestyleAlgo{boxruled}
@@ -77,8 +79,8 @@ Modelling and experimentation
 \section{Structure of the Thesis}
 \textbf{Background}. This section will outline the background information related to IaaS consumer challenges related to understanding the whole picture for price optimality of rented infrastructure. \par
 \textbf{Design}. This section explains design and environment conditions for the algorithm to be useful. \par
-\textbf{Implementation}. This section explains algorithm implementation details and data analytics software that was used - Apache Spark~\cite{spark}. \par
-\textbf{Evaluation}. The proposed algorithmic approach is applied to Google Trace data~\cite{googleTrace}. \par
+\textbf{Implementation}. This section explains algorithm implementation details and data analytics software that was used - Apache Spark\footnote{\url{https://spark.apache.org}}. \par
+\textbf{Evaluation}. The proposed algorithmic approach is applied to Google Trace data~\cite{clusterdata:Reiss2011}. \par
 \textbf{Conclusion and Further Work}. The completed data analysis is discussed. Further work related to algorithm improvements, automation and lessons learned are presented. 
  
 \newpage
@@ -135,13 +137,13 @@ For the example below, cc2.8xlarge instance's intersection point between Light a
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cc2_8xlarge}
-	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:2014}}
+	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
 	\label{fig:cc2_8xlarge}
 \end{figure}
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cph_cc2_8xlarge_zoom}
-	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:2014}}
+	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
 	\label{fig:cph_cc2_8xlarge_zoom}
 \end{figure}
 
@@ -562,7 +564,7 @@ The offering was splitted into three options:
 \item heavy - high upfront and low per hour cost.
 \end{enumerate}
 
-For evaluation purposes we choose two pricing schemes for two different VM configurations~\cite{AWS:2014}. Pricing details are specified in Table~\ref{tab:aws_pricing}
+For evaluation purposes we choose two pricing schemes for two different VM configurations~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}. Pricing details are specified in Table~\ref{tab:aws_pricing}
 
 \begin{table}[h]
 \begin{center}
@@ -588,15 +590,11 @@ For evaluation purposes we choose two pricing schemes for two different VM confi
 \caption{AWS pricing for reserved cc2.8xlarge and m2.4xlarge instances}
 \end{table}
 
-
-Pricing: m2.4xlarge
-m_light =  upfront : 1088, perhour : 0.676
-m_medium = upfront : 2604, perhour : 0.52 
-m_heavy = upfront : 3156, perhour : 0.272 
-
-
 \myparagraph{Usage data}
+Google released 29 day cluster usage traces of more than 12k machines running over 650k jobs~\cite{clusterdata:Reiss2011}. As analyzed in ~\cite{clusterdata:Reiss2012b} 
 
+
+\myparagraph{Pricing assignment to usage data}
 
 \section{Calculate cph and ip}
 
@@ -748,13 +746,11 @@ vm2 = Entity(m_name, m_light, m_medium, m_heavy)
 %%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\begin{thebibliography}{99}
-\bibitem{spark} https://spark.apache.org
-\bibitem{googleTrace} https://code.google.com/p/googleclusterdata
-\bibitem{AWS:2014} Access: Apr 20th, 2015, https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json
-\end{thebibliography}
-\label{endpage}
 
+\label{endpage}
+\bibliography{bib}{}
+\bibliographystyle{plain}
+\end{document}
 \end{document}
 
 \end{article}

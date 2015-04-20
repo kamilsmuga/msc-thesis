@@ -1,0 +1,60 @@
+@misc{AWS:light,
+  title = {Amazon AWS reserved instance pricing for light utilisation Linux instances},
+  howpublished = {\url{https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-light-linux.json}},
+  note = {Accessed: 2015-05-20}
+}
+
+@misc{AWS:medium,
+  title = {Amazon AWS reserved instance pricing for medium utilisation Linux instances},
+  howpublished = {\url{https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-medium-linux.json}},
+  note = {Accessed: 2015-05-20}
+}
+
+@misc{AWS:heavy,
+  title = {Amazon AWS reserved instance pricing for heavy utilisation Linux instances},
+  howpublished = {\url{https://a0.awsstatic.com/pricing/1/deprecated/ec2/ri-heavy-linux.json}},
+  note = {Accessed: 2015-05-20}
+}
+
+@TechReport{clusterdata:Reiss2011,
+   author = {Charles Reiss and John Wilkes and Joseph L. Hellerstein},
+   title = {{Google} cluster-usage traces: format + schema},
+   institution = {Google Inc.},
+   year = 2011,
+   month = Nov,
+   type = {Technical Report},
+   address = {Mountain View, CA, USA},
+   note = {Revised 2012.03.20.  Posted at URL
+ 	\url{http://code.google.com/p/googleclusterdata/wiki/TraceVersion2}},
+ }
+
+ @INPROCEEDINGS{clusterdata:Reiss2012b,
+   title = {Heterogeneity and dynamicity of clouds at scale:
+ 	{Google} trace analysis},
+   author = {Charles Reiss and Alexey Tumanov and Gregory R. Ganger and
+ 	Randy H. Katz and Michael A. Kozuch},
+   booktitle = {ACM Symposium on Cloud Computing (SoCC)},
+   year = 2012,
+   month = Oct,
+   address = {San Jose, CA, USA},
+   abstract = {To better understand the challenges in developing
+     effective cloud-based resource schedulers, we analyze the first
+     publicly available trace data from a sizable multi-purpose cluster.
+     The most notable workload characteristic is heterogeneity: in
+     resource types (e.g., cores:RAM per machine) and their usage
+     (e.g., duration and resources needed). Such heterogeneity reduces
+     the effectiveness of traditional slot- and core-based scheduling.
+     Furthermore, some tasks are constrained as to the kind of machine
+     types they can use, increasing the complexity of resource assignment
+     and complicating task migration. The workload is also highly
+     dynamic, varying over time and most workload features, and is
+     driven by many short jobs that demand quick scheduling decisions.
+     While few simplifying assumptions apply, we find that many
+     longer-running jobs have relatively stable resource utilizations,
+     which can help adaptive resource schedulers.},
+   url = {http://www.pdl.cmu.edu/PDL-FTP/CloudComputing/googletrace-socc2012.pdf},
+   privatenote = {An earlier version of this was posted at
+ 	\url{http://www.istc-cc.cmu.edu/publications/papers/2012/ISTC-CC-TR-12-101.pdf},
+ 	and included here as clusterdata:Reiss2012a. Please use this
+ 	version instead of that.},
+ }
