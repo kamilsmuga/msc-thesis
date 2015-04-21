@@ -238,7 +238,7 @@ This is an implementation of \textit{cph} metric~\ref{eq:cph} defined in Taxonom
 \end{algorithm}
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[label={cost_per_hour},caption={Uptime per machine implementation in Apache Spark},frame=single] 
+\begin{lstlisting}[label={cost_per_hour},caption={Cost per hour implementation in Python},frame=single] 
 def _calc_cost_per_hour(self, upfront, cost_per_hour, hours_per_day):
         return (upfront + (365 * cost_per_hour * hours_per_day)) /
                 (365 * hours_per_day)
@@ -387,45 +387,6 @@ task_counter = distFile.map(mapping).reduceByKey(add)
 \end{lstlisting}
 \end{minipage}
 
-\myparagraph{Calculate cluster averages}
-
-Algorithm~\ref{alg:avg_cluster} represents pseudo-code implementation.
-
-\begin{algorithm}[h]
-\caption{}
-\label{alg:avg_cluster}
- \KwData{Daily CPU, memory usage and task count in a form of \textless K, List\textless V\textgreater\textgreater where K is Machine ID}
- \KwResult{Average CPU, memory usage and task count}
- \algrenewcommand\algorithmicfunction{\textbf{class}}
- \algrenewcommand\algorithmicprocedure{\textbf{method}}
-  \begin{algorithmic}[1]
-        \Procedure{map}{$\textrm{Id } key, \textrm{List } values}$
-                \State $\textsc{Emit}(\textrm{Id }key, (value, 1))$
-        \EndProcedure
-        \Procedure{combine}{$\textrm{Id } key, \textrm{List } values}$
-                \State $\textsc{Emit}(\textrm{Id }key, (currentValue + value, counter += 1))$
-        \EndProcedure
-        \Procedure{reduce}{$\textrm{Id } key, \textrm{Int } aggValue}$
-                \State $\textsc{Emit}(\textrm{Id }key, sum / counter)$
-        \EndProcedure
-  \end{algorithmic}
-\end{algorithm}
-
-\begin{minipage}{\linewidth}
-\begin{lstlisting}[label={avg_cluster},caption={Example code for averages in Apache Spark},frame=single] 
-    sc = SparkContext(appName="avgByKey", conf=SparkConf().set("spark.driver.host", "localhost"))
-
-    data = sc.parallelize( [(0, 2.), (0, 4.), (1, 0.), (1, 10.), (1, 20.)] )
-
-    sumCount = data.combineByKey(lambda value: (value, 1),
-                                 lambda x, value: (x[0] + value, x[1] + 1),
-                                 lambda x, y: (x[0] + y[0], x[1] + y[1]))
-
-    averageByKey = sumCount.map(lambda (label, (value_sum, count)): (label, value_sum / count))
-
-    print averageByKey.collectAsMap()
-\end{lstlisting}
-\end{minipage}
 
 \subsubsection{Squeeze-them-in suggestion strategy}
 
@@ -602,9 +563,136 @@ The light scheme is a good fit for relatively short periods of time, e.g. during
 
 We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \textit{Scheme 1} and \textit{Scheme 2}.  
  
+
+\section{Input data schema transformation and aggregations}
+
+Google trace data contains a lot of detailed information. This paper focuses on uptime and we extracted only relevant data for further evaluation. Machine and task events original schema is presented on Tables~\ref{tab:machine_events} and~\ref{tab:task_events} and fields selected for further transformation and aggregation are marked in bold text. 
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1 & \textbf{timestamp}\\
+    \hline
+    2 & \textbf{machine id} \\
+     \hline
+    3 & event type\\
+     \hline
+    4 & platform id\\
+     \hline
+    5 & \textbf{capacity: CPU}\\
+     \hline
+    6 & \textbf{capacity: memory}\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Machine events table schema from Google trace}
+\label{tab:machine_events}
+\end{table}
+
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1 & \textbf{start time of the measurement period}\\
+    \hline
+    2 & \textbf{end time of the measurement period}\\
+     \hline
+    3 & job ID\\
+     \hline
+    4 & task index\\
+     \hline
+    5 & \textbf{machine ID} \\
+     \hline
+    6 & mean CPU usage rate \\
+    \hline
+    7 & \textbf{canonical memory usage}\\
+    \hline
+    8 & assigned memory usage\\
+    \hline
+    9 & unmapped page cache memory usage\\
+    \hline
+    10 & total page cache memory usage\\
+    \hline
+    11 & maximum memory usage\\
+    \hline
+    12 & mean disk I/O time\\
+    \hline
+    13 & mean local disk space used\\
+    \hline
+    14 & maximum CPU usage\\
+    \hline
+    15 & maximum disk IO time\\
+    \hline
+    16 & cycles per instruction (CPI)\\
+    \hline
+    17 & memory accesses per instruction\\
+    \hline
+    18 & sample portion\\
+    \hline
+    19 & aggregation type \\
+    \hline    
+    20 & \textbf{sampled CPU usage}\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Task events table schema from Google trace}
+\label{tab:task_events}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1& machine ID\\
+    \hline
+    2 & total CPU usage\\
+     \hline
+    3 & CPU capacity\\
+     \hline
+    4 & total assigned memory usage\\
+     \hline
+    5 & memory capacity\\
+     \hline
+    6 & number of tasks\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Aggregated statistics from Google trace data}
+\label{tab:new_schema}
+\end{table}
+
+Table~\ref{tab:new_schema} is a new schema produced from join of capacity metrics from machine events and aggregations computed from tasks events data. 
+
+\myparagraph{Daily usage}
+As a first step, the task usage data is grouped into separate buckets to represent 1 day worth of data based on timestamps. Listing~\ref{daily_usage} shows Apache Spark filter implementation in Python. This transformation created 29 folders of data.
+
+\myparagraph{Uptime}
+Uptime per day per machine was calculated based on aggregation of task duration times for a given day. Algorithm~\ref{alg:uptime_per_machine} shows design and Listing~\ref{uptime_per_machine_implementation} represents implementation of this aggregation. Total number of hours in cluster is 8705743, which gives 23.36 hours daily per machine on average. 
+
+Transformation to below schema. 
+- total number of tasks per day
+
+\myparagraph{Total CPU and memory usage}
+CPU and memory aggregation logic is presented in Algorithm~\ref{alg:agg_cpu_mem} and implemented in Listing~\ref{agg_cpu_mem_implementation}. The total CPU consumption of the cluster is 15972217.38, which gives 43.77 daily per machine on average. The total memory usage is 30676363.36, which is 84.06 on average. 
+
+\myparagraph{Total number of tasks}
+An aggregated number of tasks is calculated based on Algorithm~\ref{alg:jobs_per_day} and implementation presented in Listing~\ref{jobs_per_day}. The total number of tasks is 1234716525, which gives 3383.65 tasks per day per machine on average.
+
+
 \section{Pricing data indicators}
 
 \subsection{Cost per hour}
+
+Based on Formula~\ref{eq:cph} implemented in Python and presented on Listing~\ref{cost_per_hour}, we calculated \textit{cost per hour} for both analyzed schemes. Results are presented on Table~\ref{tab:cph:scheme1} and~\ref{tab:cph:scheme2} in respect of number of hours per day a machine would run. The cost per hour drops when uptime per day rises. The same trend exhibits for both schemes.
+
 \myparagraph{Scheme1}
 \begin{table}[h]
 \begin{center}
@@ -722,14 +810,15 @@ We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \
  \hline 
 24&0.8002009132420091&0.8172602739726028&0.6322739726027398 \\
  \hline 
-
     \end{tabular}
 \end{center}
 \caption{cph results for m2.4xlarge reserved instance}
-\label{tab:cph:scheme1}
+\label{tab:cph:scheme2}
 \end{table}
 
 \subsection{Intersection points}
+
+Based on Formula~\ref{alg:intersection points} implemented in Python and presented on Listing~\ref{intersection_points} we calculated \textit{intersection points} between pricing schemes. Table~\ref{tab:intersection_points} shows results of the calculation. Intuitively, heavy schemes is the cheapest option for highly utilized machines. An interesting finding is that medium is never cheaper than light in case of Scheme 2. Figures~\ref{fig:cc2_8xlarge} and~\ref{fig:m2_4xlarge} represent graphically \textit{cph} results and \textit{intersection points} can be noticed.
 
 \begin{table}[h]
 \begin{center}
@@ -761,144 +850,11 @@ We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \
   \label{fig:m2_4xlarge}
 \end{figure}
 
-\section{Google trace data schema transformation}
+\subsection{Key distance indicator and total cost}
 
-We used machine and tasks data for further evaluation. Machine information regarding ID and capacity can be found in machine events  . 
-
-\begin{table}[h]
-\begin{center}
-    \begin{tabular}{| l | l |}
-    \hline
-    & \textbf{Column name} \\
-    \hline
-    1 & timestamp\\
-    \hline
-    2 & machine id\\
-     \hline
-    3 & event type\\
-     \hline
-    4 & platform id\\
-     \hline
-    5 & capacity: CPU\\
-     \hline
-    6 & capacity: memory\\
-    \hline
-    \end{tabular}
-\end{center}
-\caption{Machine events table schema from Google trace}
-\label{tab:machine_events}
-\end{table}
-
+Key distance indicator got calculated for both schemes based on Algorithm~\ref{alg:distance_from_optimality}.
 
 \begin{table}[h]
-\begin{center}
-    \begin{tabular}{| l | l |}
-    \hline
-    & \textbf{Column name} \\
-    \hline
-    1 & start time of the measurement period\\
-    \hline
-    2 & end time of the measurement period\\
-     \hline
-    3 & job ID\\
-     \hline
-    4 & task index\\
-     \hline
-    5 & machine ID \\
-     \hline
-    6 & mean CPU usage rate \\
-    \hline
-    7 & canonical memory usage\\
-    \hline
-    8 & assigned memory usage\\
-    \hline
-    9 & unmapped page cache memory usage\\
-    \hline
-    10 & total page cache memory usage\\
-    \hline
-    11 & maximum memory usage\\
-    \hline
-    12 & mean disk I/O time\\
-    \hline
-    13 & mean local disk space used\\
-    \hline
-    14 & maximum CPU usage\\
-    \hline
-    15 & maximum disk IO time\\
-    \hline
-    16 & cycles per instruction (CPI)\\
-    \hline
-    17 & memory accesses per instruction\\
-    \hline
-    18 & sample portion\\
-    \hline
-    19 & aggregation type \\
-    \hline    
-    20 & sampled CPU usage\\
-    \hline
-    \end{tabular}
-\end{center}
-\caption{Machine events table schema from Google trace}
-\label{tab:task_events}
-\end{table}
-
-Transformation to below schema. 
-- uptime per day
-- total CPU usage per day
-- total memory usage per day
-- total number of tasks per day
-
-\begin{lstlisting}
-Schema after transformation (splitted per day)
-        1,machine ID,INTEGER,YES
-        2,uptime
-        4,total CPU usage,INTEGER,YES
-        5,CPU capacity, INTEGER, YES
-        6,total assigned memory usage,FLOAT,NO
-        8,MEMORY capacity,FLOAT,YES
-        9,NUMBER of tasks per machine per day
-\end{lstlisting}
-
-\begin{table}[h]
-\begin{center}
-    \begin{tabular}{| l | l |}
-    \hline
-    & \textbf{Column name} \\
-    \hline
-    1 & timestamp\\
-    \hline
-    2 & machine id\\
-     \hline
-    3 & event type\\
-     \hline
-    4 & platform id\\
-     \hline
-    5 & capacity: CPU\\
-     \hline
-    6 & capacity: memory\\
-    \hline
-    \end{tabular}
-\end{center}
-\caption{Machine events table schema from Google trace}
-\label{tab:new_schema}
-\end{table}
-
-~\cite{test}
-
-\section{Calculate KDI and total cost on google trace data }
-
-Machines in Google Cluster Trace dataset do not have any pricing data attached. For further evaluation purposes, we have to assign example pricing schemes to each virtual machine. 
-Assumption: we take ip(medium, heavy) and assign heavy scheme to cpu and mem of platform B. The rest is medium.
-
-Measurement period = 29 days
-Total number of machines: 12583
-0.5 and 0.5,0.25 = 10595 = 84.2\% = heavy
-rest = 1988 = 15.8\% = medium
-
-
-
-
-\myparagraph{Cluster statistics}
 \begin{center}
     \begin{tabular}{| l | l | l |}
     \hline
@@ -908,14 +864,17 @@ rest = 1988 = 15.8\% = medium
     \hline
     KDI & +3 215 231 & +5 431 137 \\
     \hline
-    Total CPU & 15972217.38 & 15972217.38 \\
-    \hline
-    Total Memory & 30676363.36 & 30676363.36 \\
-    \hline
-    Number of tasks & 1234716525 & 1234716525 \\
-    \hline
+%    Total CPU & 15972217.38 & 15972217.38 \\
+%    \hline
+%    Total Memory & 30676363.36 & 30676363.36 \\
+%    \hline
+%    Number of tasks & 1234716525 & 1234716525 \\
+%    \hline
     \end{tabular}
 \end{center}
+\caption{KDI and total cost for cluster}
+\label{tab:kdi_and_cost}
+\end{table}
 
 \myparagraph{Cluster SLO averages}
 
