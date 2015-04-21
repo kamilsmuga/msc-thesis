@@ -131,15 +131,11 @@ cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 
 \subsection{Intersection points between pricing schemes}
 
+TO BE REWRITTEN!
+
 Cost per hour is calculated for each of available pricing schemes. Single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results produces a graph similar to Figure~\ref{fig:cc2_8xlarge}. \par 
 This representation allows to notice pricing trends. In the example below, price drops exponentially for around first 5 hours of usage and nearly stabilizes afterward. Light is the cheapest option for around 15 hours per day usage. This is better visible on Figure~\ref{fig:cph_cc2_8xlarge_zoom}. After 15 hours, it is better to invest in the Heavy utilization scheme. This is the point that will be called \textit{an intersection point} between 2 pricing schemes and noted as \textit{ip(scheme1, scheme2)}. \par
 For the example below, cc2.8xlarge instance's intersection point between Light and Heavy schemes is \textit{ip(light, heavy) = 16}.
-
-\begin{figure}[H]
-	\includegraphics[width=\linewidth]{figures/cc2_8xlarge}
-	\caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
-	\label{fig:cc2_8xlarge}
-\end{figure}
 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cph_cc2_8xlarge_zoom}
@@ -624,45 +620,45 @@ We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \
     \hline
 	4&2.110849315068493&3.3797260273972602&3.785657534246575 \\    
 	\hline
-5&1.8694794520547946&2.811780821917808&3.1007260273972603 \\
-	\hline
-6&1.7085662100456622&2.433150684931507&2.64410502283105 \\
-	\hline 
-7&1.593628180039139&2.162700587084149&2.317947162426614 \\
-\hline 
-8&1.5074246575342467&1.9598630136986301&2.0733287671232876 \\
-\hline
-9&1.4403774733637749&1.8021004566210044&1.8830700152207003 \\
-\hline
-10&1.3867397260273973&1.6758904109589041&1.73086301369863 \\ 
-\hline
-11&1.342854296388543&1.5726276463262765&1.6063300124533002 \\ 
-\hline
-12&1.3062831050228312&1.4865753424657535&1.5025525114155251 \\
-\hline
-13&1.2753382507903057&1.4137618545837725&1.414740779768177 \\
-\hline
-14&1.2488140900195697&1.3513502935420745&1.3394735812133072 \\
-\hline
-15&1.2258264840182649&1.2972602739726027&1.2742420091324203 \\
-\hline
-16&1.2057123287671234&1.249931506849315&1.2171643835616437 \\
-\hline
-17&1.1879645447219984&1.208170829975826&1.1668017727639 \\
-\hline
-18&1.1721887366818875&1.1710502283105022&1.12203500761035 \\ 
-\hline
-19&1.1580735400144198&1.1378370583994233&1.0819805335255948 \\
-\hline
-20&1.1453698630136988&1.107945205479452&1.045931506849315 \\
-\hline
-21&1.1338760600130462&1.0809001956947162&1.0133157208088714 \\
-\hline
-22&1.1234271481942715&1.0563138231631384&0.9836650062266501 \\
-\hline
-23&1.1138868374032165&1.0338653960690887&0.9565926146515782 \\ 
-\hline
-24&1.1051415525114157&1.0132876712328769&0.9317762557077626 \\ 
+  5&1.8694794520547946&2.811780821917808&3.1007260273972603 \\
+  	\hline
+  6&1.7085662100456622&2.433150684931507&2.64410502283105 \\
+  	\hline 
+  7&1.593628180039139&2.162700587084149&2.317947162426614 \\
+  \hline 
+  8&1.5074246575342467&1.9598630136986301&2.0733287671232876 \\
+  \hline
+  9&1.4403774733637749&1.8021004566210044&1.8830700152207003 \\
+  \hline
+  10&1.3867397260273973&1.6758904109589041&1.73086301369863 \\ 
+  \hline
+  11&1.342854296388543&1.5726276463262765&1.6063300124533002 \\ 
+  \hline
+  12&1.3062831050228312&1.4865753424657535&1.5025525114155251 \\
+  \hline
+  13&1.2753382507903057&1.4137618545837725&1.414740779768177 \\
+  \hline
+  14&1.2488140900195697&1.3513502935420745&1.3394735812133072 \\
+  \hline
+  15&1.2258264840182649&1.2972602739726027&1.2742420091324203 \\
+  \hline
+  16&1.2057123287671234&1.249931506849315&1.2171643835616437 \\
+  \hline
+  17&1.1879645447219984&1.208170829975826&1.1668017727639 \\
+  \hline
+  18&1.1721887366818875&1.1710502283105022&1.12203500761035 \\ 
+  \hline
+  19&1.1580735400144198&1.1378370583994233&1.0819805335255948 \\
+  \hline
+  20&1.1453698630136988&1.107945205479452&1.045931506849315 \\
+  \hline
+  21&1.1338760600130462&1.0809001956947162&1.0133157208088714 \\
+  \hline
+  22&1.1234271481942715&1.0563138231631384&0.9836650062266501 \\
+  \hline
+  23&1.1138868374032165&1.0338653960690887&0.9565926146515782 \\ 
+  \hline
+  24&1.1051415525114157&1.0132876712328769&0.9317762557077626 \\ 
     \hline
     \end{tabular}
 \end{center}
@@ -734,29 +730,160 @@ We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \
 \end{table}
 
 \subsection{Intersection points}
-\myparagraph{Scheme1}
-Intersection points:
-Light/medium : 17
-Medium/heavy : 13
-Light / heavy : 16
-\myparagraph{Scheme2}
-Intersection points:
-Light/medium : Never (surprisingly medium is never cheaper than light)
-Medium/heavy : 6
-Light / heavy : 14
 
-\section{Transform initial Google data schema to below per day}
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    & \textbf{Scheme 1} & \textbf{Scheme 2} \\
+    \hline
+    light/medium & 17 & never \\
+    \hline
+    light/heavy & 16 & 6 \\
+    \hline
+    medium/heavy & 13 & 14 \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Intersection points for Scheme 1 and Scheme 2}
+\label{tab:intersection_points}
+\end{table}
 
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{figures/cc2_8xlarge}
+  \caption{\textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
+  \label{fig:cc2_8xlarge}
+\end{figure}
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{figures/m2_4xlarge}
+  \caption{\textit{cph} results for Amazon AWS m2.4xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
+  \label{fig:m2_4xlarge}
+\end{figure}
+
+\section{Google trace data schema transformation}
+
+We used machine and tasks data for further evaluation. Machine information regarding ID and capacity can be found in machine events  . 
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1 & timestamp\\
+    \hline
+    2 & machine id\\
+     \hline
+    3 & event type\\
+     \hline
+    4 & platform id\\
+     \hline
+    5 & capacity: CPU\\
+     \hline
+    6 & capacity: memory\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Machine events table schema from Google trace}
+\label{tab:machine_events}
+\end{table}
+
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1 & start time of the measurement period\\
+    \hline
+    2 & end time of the measurement period\\
+     \hline
+    3 & job ID\\
+     \hline
+    4 & task index\\
+     \hline
+    5 & machine ID \\
+     \hline
+    6 & mean CPU usage rate \\
+    \hline
+    7 & canonical memory usage\\
+    \hline
+    8 & assigned memory usage\\
+    \hline
+    9 & unmapped page cache memory usage\\
+    \hline
+    10 & total page cache memory usage\\
+    \hline
+    11 & maximum memory usage\\
+    \hline
+    12 & mean disk I/O time\\
+    \hline
+    13 & mean local disk space used\\
+    \hline
+    14 & maximum CPU usage\\
+    \hline
+    15 & maximum disk IO time\\
+    \hline
+    16 & cycles per instruction (CPI)\\
+    \hline
+    17 & memory accesses per instruction\\
+    \hline
+    18 & sample portion\\
+    \hline
+    19 & aggregation type \\
+    \hline    
+    20 & sampled CPU usage\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Machine events table schema from Google trace}
+\label{tab:task_events}
+\end{table}
+
+Transformation to below schema. 
+- uptime per day
+- total CPU usage per day
+- total memory usage per day
+- total number of tasks per day
+
+\begin{lstlisting}
 Schema after transformation (splitted per day)
         1,machine ID,INTEGER,YES
-        2,uptime (how many hours machine is on),INTEGER,YES
-        3,uptime based on summarized task time,INTEGER,YES
+        2,uptime
         4,total CPU usage,INTEGER,YES
         5,CPU capacity, INTEGER, YES
         6,total assigned memory usage,FLOAT,NO
-        7,total maximum memory usage,FLOAT,NO
         8,MEMORY capacity,FLOAT,YES
         9,NUMBER of tasks per machine per day
+\end{lstlisting}
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    & \textbf{Column name} \\
+    \hline
+    1 & timestamp\\
+    \hline
+    2 & machine id\\
+     \hline
+    3 & event type\\
+     \hline
+    4 & platform id\\
+     \hline
+    5 & capacity: CPU\\
+     \hline
+    6 & capacity: memory\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Machine events table schema from Google trace}
+\label{tab:new_schema}
+\end{table}
+
+~\cite{test}
 
 \section{Calculate KDI and total cost on google trace data }
 
