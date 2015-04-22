@@ -311,17 +311,6 @@ Example algorithm results
 Generate report of machines based on distance from optimality points. Use customizable threshold. 
 Results from the report will be used to calculate suggestions.
 
-\myparagraph{Visual recognition}
-
-Visual recognition as a helper method to define thresholds, especially for further incremental optimizations. 
-Useful as static thresholds can miss a whole set of machines that are just below the threshold. 
-
-\begin{figure}[H]
-       \includegraphics[width=\linewidth]{figures/cubism}
-      \caption{Visualization of distance from optimality points. Green - positive, Blue - negative values.}
-        \label{fig:cubism}
-\end{figure}
-
 \myparagraph{Aggregated CPU and memory usage}
 
 Aggregated values of CPU and memory will help to suggest better utilization strategies that guarantee SLOs. Algorithm~\ref{alg:agg_cpu_mem} represents pseudo-code implementation and~\ref{agg_cpu_mem_implementation} contains implementation in Python with Apache Spark.
@@ -507,7 +496,7 @@ Apache Spark 1.2.1\footnote{\url{https://spark.apache.org}} - an engine for larg
 \label{tab:spark_conf}
 \end{table}
 
-Settings were tweaked during computation mostly due to frequent Out Of Memory errors. Default driver and executor settings - 256M and 512M respectively - were not enough to handle the volume of input data. Further OOMs occurred during \textit{RRD.reduceByKey}\footnote{\url{https://spark.apache.org/docs/1.2.1/api/python/pyspark.html#pyspark.RDD.reduceByKey}} operations as it required to compute a fairly large hash map. Tweaks of \textit{spark.default.parallelism} setting worked the best as it enforced more granular input data chunking.
+Settings were tweaked during computation mostly due to frequent Out Of Memory errors. Default driver and executor settings - 256M and 512M respectively - were not enough to handle the volume of input data. Further OOMs occurred during \textit{RRD.reduceByKey}\footnote{\url{https://spark.apache.org/docs/1.2.1/api/python/pyspark.html\#pyspark.RDD.reduceByKey}} operations as it required to compute a fairly large hash map. Tweaks of \textit{spark.default.parallelism} setting worked the best as it enforced more granular input data chunking.
 
 \section{Input data}
 
@@ -558,6 +547,7 @@ Resource utilization data is provided in normalized units - the strongest config
 Google trace does not provide any information about pricing schemes of included machines. For evaluation purposes, we will produce example configurations of different pricing schemes that could exist within a real cluster. 
 
 The majority of machines within Google cluster i.e. 82\%, have following configuration: 0.5 CPU, 0.5 RAM or 0.5 CPU, 0.25 RAM. We will assign heavy pricing scheme for these machines. For the rest of the cluster, we will assign medium pricing scheme. 
+As a result of the assignment cluster machines are grouped into 10595 machines of heavy and 2258 of medium usage.
 
 The light scheme is a good fit for relatively short periods of time, e.g. during peak. An analysis of the trace~\cite{clusterdata:Reiss2012b} shows that jobs with the highest peak-to-mean ratio are production priority jobs and they constitute only 7\% of all jobs. Therefore, we will not assign any light pricing schemes for this evaluation purposes. 
 
@@ -676,9 +666,6 @@ As a first step, the task usage data is grouped into separate buckets to represe
 
 \myparagraph{Uptime}
 Uptime per day per machine was calculated based on aggregation of task duration times for a given day. Algorithm~\ref{alg:uptime_per_machine} shows design and Listing~\ref{uptime_per_machine_implementation} represents implementation of this aggregation. Total number of hours in cluster is 8705743, which gives 23.36 hours daily per machine on average. 
-
-Transformation to below schema. 
-- total number of tasks per day
 
 \myparagraph{Total CPU and memory usage}
 CPU and memory aggregation logic is presented in Algorithm~\ref{alg:agg_cpu_mem} and implemented in Listing~\ref{agg_cpu_mem_implementation}. The total CPU consumption of the cluster is 15972217.38, which gives 43.77 daily per machine on average. The total memory usage is 30676363.36, which is 84.06 on average. 
@@ -852,13 +839,14 @@ Based on Formula~\ref{alg:intersection points} implemented in Python and present
 
 \subsection{Key distance indicator and total cost}
 
-Key distance indicator got calculated for both schemes based on Algorithm~\ref{alg:distance_from_optimality}.
+Key distance indicator was calculated based on Algorithm~\ref{alg:distance_from_optimality}. 
+Total cost was calculated based on total uptime and pricing scheme assignment. Results are presented on Table~\ref{tab:kdi_and_cost}.
 
 \begin{table}[h]
 \begin{center}
     \begin{tabular}{| l | l | l |}
     \hline
-    Indicator & Scheme 1 & Scheme 2 \\
+    \textbf{Indicator} & \textbf{Scheme 1} & \textbf{Scheme 2} \\
     \hline
     Total cost & \$8 177 048 & \$5 637 418 \\
     \hline
@@ -876,37 +864,49 @@ Key distance indicator got calculated for both schemes based on Algorithm~\ref{a
 \label{tab:kdi_and_cost}
 \end{table}
 
-\myparagraph{Cluster SLO averages}
+KDI for Scheme 1 and 2 is a positive number, which is expected based on 82\% of heavy scheme assignment and 23.36 hours of uptime per day on average.
+Scheme 1 is 31\% more expensive than Scheme 2 and this is expected as well as \textit{cph} values are higher for Scheme 1. 
 
-Avg cpu usage per machine = 15972217.38/12583 = 1269.35/29 = 43.77
-Avg mem usage per machine = 30676363.36/12583 = 2437.92/29 = 84.06
-Avg tasks number per machine = 1234716525/12583 = 98125.77/29 = 3383.65
+\section{Recognize inefficiencies using threshold-based report}
 
+KDI can be used to find inefficiencies.  Any value below 0 indicates non-optimal usage for a given scheme. 
+A user can specify a threshold to find non-optimal cases. We will assume that non-optimal usage within the cluster is when machine reports negative KDI values for the whole trace period.
+ These criteria identified 932 and 937 machines for Scheme 1 and 2 respectively. Detailed results splitted by cost and resource utilization are presented in Table~\ref{tab:threshold_based_report}.
 
-\section{Recognize inefficiencies with Threshold-based Report}
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Property} & \textbf{Scheme 1} & \textbf{Scheme 2} \\
+    \hline
+    Number of machines to tune & 932 & 937 \\
+    \hline
+    Total cost & \$657 200 & \$532 840.76 \\
+    \hline
+    CPU capacity to accommodate & 1 320 781.36 & 1 327 202.18 \\
+    \hline
+    Memory capacity to accommodate & 4 286 742.06 & 4 303 983.31 \\
+    \hline
+    Number of tasks to execute & 118869614 & 119367988 \\
+    \hline
+    Total uptime & 648519 & 651899 \\
+    \hline
+    Average cost per hour & \$1.0134 & \$0.817 \\
+    \hline
+    Average cost per task & \$0.00553  & \$0.00446 \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Results of report run on cluster with criteria of KDI below 0 for 29 days}
+\label{tab:threshold_based_report}
+\end{table}
 
-The report will filter all machines that reported non-optimal - negative distance from intersection point - configuration during measurement period (29 days).
-
-\myparagraph{Scheme 1}
-Number of machines to tune: 932
-CPU capacity to accommodate: 1 320 781.36
-Memory capacity to accommodate: 4 286 742.06
-Number of tasks to execute: 118869614
-Cost of running non-optimal machines: \$657 200
-Total uptime: 648519
-cost per hour = \$1.01338588383687
-Cost per task =  \$657 200 / 118869614 = \$0.00552874681666
-
-\myparagraph{Scheme 2}
-Number of machines to tune: 937
-CPU capacity to accommodate: 1 327 202.18
-Memory capacity to accommodate: 4 303 983.31
-Number of tasks to execute: 119367988
-Cost of running non-optimal machines: \$532 840.76
-Total uptime: 651899
-
+The cost of running such identified non-optimal machines is around 8\% and 10\% of total cost for Scheme 1 and 2 respectively.  
 
 \section{Squeeze-them-in suggestion strategy}
+
+Once inefficiencies are identified, we will attempt to find a more optimal solution. 
+
 
 \myparagraph{Scheme 1}
 total spare cpu = 3 697 171.44
@@ -944,12 +944,12 @@ Avg tasks number per machine = 1234716525/11646 = 106020.65 / 29 = 3655.88 +7.45
 
 \section{New capacity configuration suggestion}
 
-vm1 = Entity(c_name, c_light, c_medium, c_heavy)
-vm2 = Entity(m_name, m_light, m_medium, m_heavy)
+$vm1 = Entity(c_name, c_light, c_medium, c_heavy)$
+$vm2 = Entity(m_name, m_light, m_medium, m_heavy)$
 
->>> calc_options(uptime, vm2, 29)
+$calc_options(uptime, vm2, 29)$
 (1597, 3727, 972, 567 273.49, 998 186.23, 410 041.68)
->>> calc_options(uptime, vm1, 29)
+$calc_options(uptime, vm1, 29)$
 (1397, 1720, 972, 770 417.58, 876 376.34, 604 274.61)
 
 \section{Validate influence of suggestions and correlation with KDI}
