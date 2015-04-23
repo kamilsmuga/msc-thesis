@@ -413,7 +413,7 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 \end{algorithm}
 
-\subsubsection{New capacity configuration suggestion}
+\subsubsection{New Capacity configuration suggestion}
 
 \begin{algorithm}[h]
 \caption{New configuration suggestion}
@@ -464,7 +464,7 @@ Evaluation process can be splitted into four phases:
 \item collection and transformation of pricing and usage data,
 \item calculation of key indicators (\textit{cph, ip(scheme1, scheme2), KDI}) and cluster characteristics (\textit{total cost, performance averages}), 
 \item suggestion of changes based on Algorithm~\ref{alg:squeeze-them-in} and~\ref{alg:new_configuration},
-\item validation of positive correlation between \textit{KDI} and \textit{total cost} changes.
+\item validation of a positive correlation between \textit{KDI} and \textit{total cost} changes.
 \end{enumerate}
 
 \section{Setup description}
@@ -474,7 +474,7 @@ Hardware - Intel Xeon 6-core x86\_64 2.4GHz, L3 cache 24MB, RAM 28GB. \\
 Operating System - OS X Yosemite 10.10.2
 
 \myparagraph{Platform}
-Apache Spark 1.2.1\footnote{\url{https://spark.apache.org}} - an engine for large-scale data processing. All of map reduce jobs were written using Python API. Jobs were executed using standalone cluster mode with settings specified in Table~\ref{tab:spark_conf}. Job run times varied widely based on input data size and complexity of computations - from 20hs+ for transformations on 100G+ data to 1 minute aggregations on 100-200M input.
+Apache Spark 1.2.1\footnote{\url{https://spark.apache.org}} - an engine for large-scale data processing. All of the map-reduce jobs were written using Python API. Jobs were executed using standalone cluster mode with settings specified in Table~\ref{tab:spark_conf}. Job run times varied widely based on input data size and complexity of computations - from 20hs+ for transformations on 100G+ data to 1-minute aggregations on 100-200M input.
 
 \begin{table}[h]
 \begin{center}
@@ -510,7 +510,7 @@ The offering was splitted into three options:
 \item heavy - high upfront and low per hour cost.
 \end{enumerate}
 
-For evaluation purposes we choose two pricing schemes for two different VM configurations~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}. Pricing details are specified in Table~\ref{tab:aws_pricing}
+For evaluation purposes, we choose two pricing schemes for two different VM configurations~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}. Pricing details are specified in Table~\ref{tab:aws_pricing}
 
 \begin{table}[h]
 \begin{center}
@@ -538,7 +538,7 @@ For evaluation purposes we choose two pricing schemes for two different VM confi
 
 \myparagraph{Usage data}
 
-Google released 29-day cluster usage traces of more than 12k machines running over 650k jobs~\cite{clusterdata:Reiss2011}. An analysis~\cite{clusterdata:Reiss2012b} revealed that the workload is heterogeneous, which is somewhat unique compared to other traces and makes a good fit for testing.
+Google released 29-day cluster usage traces of more than 12k machines that run over 650k jobs~\cite{clusterdata:Reiss2011}. An analysis~\cite{clusterdata:Reiss2012b} revealed that the workload is heterogeneous, which is somewhat unique compared to other traces and makes a good fit for testing.
 The trace contains data about jobs submitted by users. Each job is made of tasks. Each task reports metrics about resource consumption - e.g. CPU, memory - and timestamps. The trace does not contain information about the purpose of the jobs, which limits SLO assumptions to resource utilization. 
 Resource utilization data is provided in normalized units - the strongest configuration is 1 and the rest of configurations are described in relation to that value.
 
@@ -556,7 +556,7 @@ We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \
 
 \section{Input data schema transformation and aggregations}
 
-Google trace data contains a lot of detailed information. This paper focuses on uptime and we extracted only relevant data for further evaluation. Machine and task events original schema is presented on Tables~\ref{tab:machine_events} and~\ref{tab:task_events} and fields selected for further transformation and aggregation are marked in bold text. 
+Google trace data contains a lot of detailed information. This paper focuses on uptime and we extracted only relevant data for further evaluation. Machine and task events original schema is presented in Tables~\ref{tab:machine_events} and~\ref{tab:task_events} and fields selected for further transformation and aggregation are marked in bold text. 
 
 \begin{table}[h]
 \begin{center}
@@ -665,7 +665,7 @@ Table~\ref{tab:new_schema} is a new schema produced from join of capacity metric
 As a first step, the task usage data is grouped into separate buckets to represent 1 day worth of data based on timestamps. Listing~\ref{daily_usage} shows Apache Spark filter implementation in Python. This transformation created 29 folders of data.
 
 \myparagraph{Uptime}
-Uptime per day per machine was calculated based on aggregation of task duration times for a given day. Algorithm~\ref{alg:uptime_per_machine} shows design and Listing~\ref{uptime_per_machine_implementation} represents implementation of this aggregation. Total number of hours in cluster is 8705743, which gives 23.36 hours daily per machine on average. 
+Uptime per day per machine was calculated based on an aggregation of task duration times for a given day. Algorithm~\ref{alg:uptime_per_machine} shows design and Listing~\ref{uptime_per_machine_implementation} represents the implementation of this aggregation. The total number of hours in the cluster is 8705743, which gives 23.36 hours daily per machine on average. 
 
 \myparagraph{Total CPU and memory usage}
 CPU and memory aggregation logic is presented in Algorithm~\ref{alg:agg_cpu_mem} and implemented in Listing~\ref{agg_cpu_mem_implementation}. The total CPU consumption of the cluster is 15972217.38, which gives 43.77 daily per machine on average. The total memory usage is 30676363.36, which is 84.06 on average. 
@@ -678,7 +678,7 @@ An aggregated number of tasks is calculated based on Algorithm~\ref{alg:jobs_per
 
 \subsection{Cost per hour}
 
-Based on Formula~\ref{eq:cph} implemented in Python and presented on Listing~\ref{cost_per_hour}, we calculated \textit{cost per hour} for both analyzed schemes. Results are presented on Table~\ref{tab:cph:scheme1} and~\ref{tab:cph:scheme2} in respect of number of hours per day a machine would run. The cost per hour drops when uptime per day rises. The same trend exhibits for both schemes.
+Based on Formula~\ref{eq:cph} implemented in Python and presented in Listing~\ref{cost_per_hour}, we calculated a \textit{cost per hour} for both analyzed schemes. Results are presented in Table~\ref{tab:cph:scheme1} and~\ref{tab:cph:scheme2} in respect of number of hours per day a machine would run. The cost per hour drops when uptime per day rises. The same trend exhibits for both schemes.
 
 \myparagraph{Scheme1}
 \begin{table}[h]
@@ -805,7 +805,7 @@ Based on Formula~\ref{eq:cph} implemented in Python and presented on Listing~\re
 
 \subsection{Intersection points}
 
-Based on Formula~\ref{alg:intersection points} implemented in Python and presented on Listing~\ref{intersection_points} we calculated \textit{intersection points} between pricing schemes. Table~\ref{tab:intersection_points} shows results of the calculation. Intuitively, heavy schemes is the cheapest option for highly utilized machines. An interesting finding is that medium is never cheaper than light in case of Scheme 2. Figures~\ref{fig:cc2_8xlarge} and~\ref{fig:m2_4xlarge} represent graphically \textit{cph} results and \textit{intersection points} can be noticed.
+Based on Formula~\ref{alg:intersection points} implemented in Python and presented in Listing~\ref{intersection_points} we calculated \textit{intersection points} between pricing schemes. Table~\ref{tab:intersection_points} shows results of the calculation. Intuitively, a heavy scheme is the cheapest option for highly utilized machines. An interesting finding is that a medium is never cheaper than light in case of Scheme 2. Figures~\ref{fig:cc2_8xlarge} and~\ref{fig:m2_4xlarge} represent graphically \textit{cph} results and \textit{intersection points} can be noticed.
 
 \begin{table}[h]
 \begin{center}
@@ -839,8 +839,8 @@ Based on Formula~\ref{alg:intersection points} implemented in Python and present
 
 \subsection{Key distance indicator and total cost}
 
-Key distance indicator was calculated based on Algorithm~\ref{alg:distance_from_optimality}. 
-Total cost was calculated based on total uptime and pricing scheme assignment. Results are presented on Table~\ref{tab:kdi_and_cost}.
+The key distance indicator was calculated based on Algorithm~\ref{alg:distance_from_optimality}. 
+Total cost was calculated based on total uptime and pricing scheme assignment. Results are presented in Table~\ref{tab:kdi_and_cost}.
 
 \begin{table}[h]
 \begin{center}
@@ -881,7 +881,7 @@ A user can specify a threshold to find non-optimal cases. We will assume that no
     \hline
     Number of machines to tune & 932 & 937 \\
     \hline
-    Total cost & \$657 200 & \$532 840.76 \\
+    Total cost & \$657 200 & \$532 841 \\
     \hline
     CPU capacity to accommodate & 1 320 781.36 & 1 327 202.18 \\
     \hline
@@ -901,58 +901,123 @@ A user can specify a threshold to find non-optimal cases. We will assume that no
 \label{tab:threshold_based_report}
 \end{table}
 
-The cost of running such identified non-optimal machines is around 8\% and 10\% of total cost for Scheme 1 and 2 respectively.  
+The cost of running identified non-optimal machines is around 8\% and 10\% of total cost for Scheme 1 and 2 respectively.  
 
 \section{Squeeze-them-in suggestion strategy}
 
-Once inefficiencies are identified, we will attempt to find a more optimal solution. 
+Based on Algorithm~\ref{alg:squeeze-them-in} we calculated spare capacity for both schemes. Results are presented in Table~\ref{tab:squeeze-them-in-capacity}
 
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Property} & \textbf{Scheme 1} & \textbf{Scheme 2} \\
+    \hline
+    Total spare CPU & 3 697 171.44 & 6 3 694 240.56  \\
+    \hline
+    Total spare memory & 6 685 407.83 & 6 682 956.59 \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Results of spare capacity calculation on the cluster}
+\label{tab:squeeze-them-in-capacity}
+\end{table}
 
-\myparagraph{Scheme 1}
-total spare cpu = 3 697 171.44
-total spare mem = 6 685 407.83
-new KDI: +3 500 037
-old KDI: +3 215 231
-KDI change: +8.14\%
-total uptime = 8056601
-new total cost = \$8 177 048 - \$657 200 = \$7 519 848
-cost change: -8.04\%
-cost per hour = \$7 519 848 / 8056601 = 0.93337723935938
-new cost per task = \$7 519 848 / 118869614 = 0.06326131419927
+In both cases, there is more spare capacity than results from Table~\ref{tab:threshold_based_report} require. It indicates we can power off all of the non-optimal machines and investigate an impact on workload and pricing indicators. Results of such an experiment are presented in Table~\ref{tab:squeeze-them-in}. 
 
-new averages 
-cpu per machine = 15972217.38/11651 = 1370.88 / 29 = 47.27 +7.4\%
-Avg mem usage per machine = 30676363.36/11651 = 2632.94/29 = 90.79 +7.41\%
-Avg tasks number per machine = 1234716525/11651 = 105975.15/29 = +7.4\%
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Property} & \textbf{Scheme 1} & \textbf{Scheme 2} \\
+    \hline
+    New KDI & +3 500 037 & +5 913 933 \\
+    \hline
+    KDI change & +8.14\% & +8.16\% \\
+    \hline
+    New total cost & \$7 519 848 & \$5 104 577.24 \\
+    \hline
+    Total cost change & -8.04\% & -9.45\% \\
+    \hline
+    New cost per hour & \$0.9334 & \$0.6339 \\
+    \hline
+    New cost per task & \$0.0633  & \$0.0428 \\
+    \hline
+    New CPU average per machine & 47.27 & 47.29 \\
+    \hline
+    CPU average change & +7.4\% & +7.44\% \\
+    \hline
+    New memory usage average & 90.79 & 90.83 \\
+    \hline
+    Memory average change & +7.41\% & +7.45\% \\
+    \hline
+    New task number average & 3654 & 3655 \\
+    \hline
+    Task average change & +7.4\% & +7.45\% \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Cluster statistics with non-optimal machines powered off}
+\label{tab:squeeze-them-in}
+\end{table}
 
-\myparagraph{Scheme 2}
-total spare cpu = 3 694 240.56 
-total spare mem = 6 682 956.59
-new KDI: +5 913 933
-old KDI: +5 431 137
-KDI change: +8.16\%
-total uptime = 8053221
-new total cost = \$5 637 418 - \$532 840.76 = \$5 104 577.24
-cost change: -9.45\%
-cost per hour = \$5 104 577.24 / 8053221 = 0.63385535303204
-new cost per task = \$5 104 577.24 / 119367988 = 0.04276336834964
+The KDI increased by above 8\% for both schemes. This is expected as we removed machines with negative KDI values. The total cost decreased by 8.04\% and 9.45\% for Scheme 1 and 2 respectively. This is also expected. We noticed a correlation between the increase of KDI and decrease of total cost. However, there is a trade-off in terms of resource utilization, which increased around 7.4\% on average. A user has to decide whether this is acceptable for his specific workload SLOs. It might work well for under-utilized clusters with a low peak-to-mean ratio. For high peak-to-mean workloads, the real difference in utilization patterns can be higher than detected by averages. To measure SLOs in these environments, we would have to use more specific metrics like requests per second or queries per second during peak. 
 
-new averages 
-cpu per machine = 15972217.38/11646 = 1371.48 / 29 = 47.29 +7.44\%
-Avg mem usage per machine = 30676363.36/11646 = 2634.07 / 29 = 90.83 +7.45\%
-Avg tasks number per machine = 1234716525/11646 = 106020.65 / 29 = 3655.88 +7.45\%
 
 \section{New capacity configuration suggestion}
 
-$vm1 = Entity(c_name, c_light, c_medium, c_heavy)$
-$vm2 = Entity(m_name, m_light, m_medium, m_heavy)$
+We used Algorithm~\ref{alg:new_configuration} to come up with new configuration suggestions based on the uptime of machines from Table~\ref{tab:threshold_based_report} and Scheme 1 and 2 pricing details. \\
+The algorithm analyzed all three \textit{intersection points} available for each scheme and returned total cost and number of machines required. Results are presented in Table~\ref{tab:new-cap-scheme1} and~\ref{tab:new-cap-scheme2}.
 
-$calc_options(uptime, vm2, 29)$
-(1597, 3727, 972, 567 273.49, 998 186.23, 410 041.68)
-$calc_options(uptime, vm1, 29)$
-(1397, 1720, 972, 770 417.58, 876 376.34, 604 274.61)
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Scheme} & \textbf{Machines} & \textbf{Total cost} \\
+    \hline
+    Light & 1397 & \$770 417.58 \\
+    \hline
+    Medium & 1720 & \$876 376.34 \\
+    \hline
+    Heavy & 972 & \$604 274.61\\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{New capacity configuration suggestions for Scheme 1}
+\label{tab:new-cap-scheme1}
+\end{table}
 
-\section{Validate influence of suggestions and correlation with KDI}
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{| l | l | l |}
+    \hline
+    \textbf{Scheme} & \textbf{Machines} & \textbf{Total cost} \\
+    \hline
+    Light & 1597 & \$567 273.49 \\
+    \hline
+    Medium & 3727 & \$998 186.23 \\
+    \hline
+    Heavy & 972 & \$410 041.68 \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{New capacity configuration suggestions for Scheme 2}
+\label{tab:new-cap-scheme2}
+\end{table}
+
+An interesting pattern raised - a medium is always the least optimal choice and heavy is the best. The suggestion to run heavy configuration for Scheme 1 would save 8.05\% compared to non-optimal machines set and 0.0065\% from total cost. Scheme 2 would save 23\% compared to non-optimal machines set and 0.022\% from total cost. KDI increased for both schemes. Scheme 1 noted 8.42\% change and Scheme 2 8.31\%. Light and medium suggestions turned out to be more expensive and were excluded from the rest of considerations. \\
+
+As opposed to the previous algorithm, this one does not violate SLOs. The new suggested capacity handles the same amount of uptime using the same resource configuration as the rest of the cluster. 
+
+
+\section{Validate correlation of total cost and KDI}
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{figures/kdi_to_cost}
+	\caption{KDI to total cost correlation}
+	\label{fig:kdi_to_cost}
+\end{figure}
+
 
 \section{Summary}
 
