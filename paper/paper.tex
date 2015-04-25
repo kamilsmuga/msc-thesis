@@ -63,21 +63,41 @@ Also, thanks to Prof. John Murphy and Viliam Holub for their support, help and a
 %%% INTRODUCTION 
 %%%%%%%%%%%%%%%%%%%%%%
 
-%%        *Some discussion to provide context
-%%        *A description of the problem
-%%        *Motivation for solving the problem
-%%        *A statement of the objectives
-%%        *Related work (mention how your work is different/better)
-%%        *Describe the proposed solution
-%%        *Mention some of the challenges
-%%        *Describe the methodology (modelling and experimentation) and key overall result (e.g., Results show proposed approach can achieve a significant reduction in the cost by enabling a more optimal selection of VM types based on resource utilisation)
-%%        *Structure of the thesis
-
 \chapter{Introduction}
 
-Cloud computing receives significant attention recently ~\cite{5741288}~\cite{5704303}.
+%%        *Some discussion to provide context
+%%  Cloud computing stal sie popularny. Firmy zaczynaja budowac cale modele biznesowe w oparciu o Cloud, 
+%% 	Wczuwamy sie w  SaaS. Uzywamy IaaS zeby hostowac na tym produkt. 
+
+In recent years, Cloud Computing receives significant attention~\cite{6185529}~\cite{5741288}~\cite{5704303} and delivers infrastructure, platform and/or software as services over the Internet~\cite{7073248}.
+
+The popularity of cloud service pushes cloud service providers to provide 
 
 The popularity of cloud service spurs the increasing demands of cloud resources to the cloud service providers. Along with the new business opportunities, the pay-as-you-go model drastically changes the usage pattern and brings technology challenges to effective capacity planning.~\cite{6274129}
+
+%%        *A description of the problem
+%% Znamy wymagania sprzetowe. Stajemy przed pytaniami: 1) jak duzo VMow 2) jakiego rodzaju 3) na jak dlugo ma kazda dzialac
+
+%%        *Motivation for solving the problem
+%% rozwiazanie problemu ma 2 glowne aspekty: 1) optymalniejsze ustawienie istniejacej architektury - oszczednosci (jaki procent?), ktore mozna zainwestowac gdzies indziej 2) to decyduje o byc lub nie byc dla oplacalnosci biznesu, ktory dziala na marginesach
+
+%%        *A statement of the objectives
+%% 1) chcemy opracowac liste niezbednych metryk, ktore umozliwiaja podejmowanie decyzji na podstawie danych 2) chcemy zaprojektowac wspolczynniki, ktore wyznaczaja i) rzeczywista cene uzywania pricing scheme ii) momenty stawania sie jednej scheme bardziej oplacalna od drugiej iii) wspolczynnika okreslajacego odleglosc od optymalnych punktow 3) chcemy zaprojektowac algorytmy, ktore zaproponuja zmiany w architekturze ze wgledu na uptime i cene i podadza nowa cene 
+
+%%        *Related work (mention how your work is different/better)
+%% prace czesto operieraja sie na IaaS albo relacji pomiedzy Saas i IaaS. Te, ktore sa z perspektywy SaaS nie uwzgledniaja tego, ze uptime wplywa na pricing.  
+
+%%        *Describe the proposed solution
+%% 1) wybralismy pewne metryki 2) policzylismy agregacje metryk w stosunku per maszyna dziennie 3) obliczylismy wspolczynniki - cph, ip(scheme1, scheme2), KDI 5) zaprojektowalismy 2 algorytmy do sugestii - krotki opis 5) uzylismy wspolczynnikow i metryk jako danych wejsciowych to algorytmow sugestii zmian
+
+%%        *Mention some of the challenges
+%% 1) zmieniajace sie ceny i zasady u providerow - coraz taniej (dowod?) 2) dostosowanie sie do sugestii wymaga migracji z istniejacego srodowiska do nowego - koszt tego nie zostal wliczony, a powinien 3) obliczenia agregacji musza byc dobrze zaimplementowane, zeby byly mozliwe na duzych ilosciach danych
+
+%%        *Describe the methodology (modelling and experimentation) and key overall result (e.g., Results show proposed approach can achieve a significant reduction in the cost by enabling a more optimal selection of VM types based on resource utilisation)
+%% metodologia - zamodelowanie sytuacji i rozwiazania - eksperymentacja z algorytmami - 
+%%        *Structure of the thesis
+
+
 
 
 In the cloud context, pricing and capacity planning are two important factors to the profit of the Infrastructure-as-a-Service (IaaS) providers~\cite{6963393}
@@ -87,22 +107,6 @@ In the cloud context, pricing and capacity planning are two important factors to
 
 Cloud computing has emerged as a new IT delivery model in which an organization or individual can rent remote compute and storage resources dynamically, using a credit card, to host networked applications “in the cloud.”. The appeal of cloud computing lies in its usage-based pricing model - organizations only pay for the resources that are actually used, and can flexibly increase or decrease the resource capacity allocated to them at any time. This elasticity provided by Cloud computing can yield significant cost savings when compared to the traditional approach of maintaining an expensive IT infrastructure that is provisioned for peak usage - organizations can instead simply rent capacity, and grow and shrink it as the workload changes.~\cite{5961733}
 
-\section{Description of the problem}
-
-\section{Motivation for solving the problem}
-
-\section{Objectives}
-This work aims to design an algorithm that answer IaaS consumer's price optimality questions and help to make adjustments based on uptime based charging per machine. 
-
-\section{Related work}
-
-
-
-
-\section{Challenges}
-
-\section{Description of methodology}
-Modelling and experimentation
 
 \section{Structure of the Thesis}
 \textbf{Background}. This section will outline the background information related to IaaS consumer challenges related to understanding the whole picture for price optimality of rented infrastructure. \par
