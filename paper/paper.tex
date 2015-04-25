@@ -119,18 +119,34 @@ Modelling and experimentation
 
 \chapter{Background}
 
-\section{The Problem Domain}
-\emph{/* Description of IaaS world - providers and consumers. */}
-\subsection{IaaS consumer point of view}
-\subsection{IaaS provider uptime-based pricing schemes}
+\section{The Problem Domain} 
 
-\section{Motivation}
-\emph{ /* Description of the problem - cloud-based company runs a mix of software services (real-time streaming, batch, web and database servers) on common hardware. How do they know whether provisioned VMs run in the most optimal configuration? */ }
+In this thesis, we look from the perspective of Software as a Service (SaaS) provider that uses an Infrastructure as a Service (IaaS) provider's services to host a product. \\
+SaaS provider seeks i) predictable cost estimates and ii) the best value for money. The latter for obvious reasons - every healthy business is interested in minimizing costs. The former is needed to set a right product pricing. Not too expensive and not too cheap. Failure to do so may ruin a business's budget. \\
+IaaS provider pricing is flexible as described in below sections. One instance configuration can have many prices based on daily uptime. Cost-aware uptime-based provisioning becomes a new consideration and adds one more parameter to standard resource-aware provisioning techniques~\cite{Bartolini:2014:AFC:2658949.2637480}.
+
+
+
+\section{Amazon EC2 pricing schemes}
+
+A price of an instance in Amazon EC2 depends on its resources and pricing scheme it belongs to. As a result of the latter, one resource configuration can have few different prices. Amazon offers on-demand, spot and reserved instances billed hourly.
+
+\paragraph{On-demand instances.} Allow to pay by the hour with no other commitments. The most expensive option.
+\paragraph{Spot instances.} A real-time bidding platform. A customer can bid on price. Instance can run only when the bid exceeds current Spot Price.
+\paragraph{Reserved instances.} Discounted price in comparison to On-demand in exchange of 1 or 3 years commitment. Guaranteed availability of reserved capacity. 
+
+This paper focuses around the concept of Reserved Instances. The scheme is further split into Light, Medium and Heavy options. They differ in upfront and hourly costs. Based on pricing data, Light serves well for short periods of daily usage, Heavy is optimized for long workloads and Medium is in between. \\
+This scheme got simplified on December 2014~\cite{AWS:pricing_change} and naming used in this paper does not match the latest offering anymore. However, the idea of having the same instance configuration priced differently based on uptime is still valid and is used by other IaaS providers, e.g. Google Compute Engine.
+
+\section{Google Compute Engine pricing}
+
+Google had greatly simplified the Compute Engine pricing. There is no concept of reservation nor bidding. All of the options are priced within pay-as-you-go model with 1 minute granularity. However, Google offers increasing discounts for sustained usage - 20\% for 25-50\% of month usage, 50-75\% of usage yields 40\% and everything above 75\% is priced with 60\% of discount rate. This is similar to the concept of Reserved Instances in a sense that uptime value influences a final price for the instance.
 
 \section{Literature review}
 
-Work related to IaaS market is focused either on provider's perspective~\cite{6274129}, provider-consumer business interactions~\cite{6676685}~\cite{6963393} or consumer point of view~\cite{5961733}~\cite{6295066}. 
+Work related to IaaS market is focused either on provider's perspective~\cite{6274129}~\cite{6253563}, provider-consumer business interactions~\cite{6676685}~\cite{6963393} or consumer point of view~\cite{5961733}~\cite{6295066}. 
 
+Paper~\cite{6253563} proposed a pricing framework for cloud services using game theory and data mining techniques. The framework determines the price based on recent usage data and available resources. It also takes into consideration various economic models and attempts to find the best price for provider and consumer at the same time.
 
 In this paper~\cite{6274129}, authors focused on an analysis of pay-as-you-go flexible charging impact on IaaS provider's capacity planning. Their contribution was focused on cloud capacity estimation and management. Specifically, they developed a method to predict provisioning demand based on selected time series metrics. 
 Although prediction is not included in this paper, it would be a next logical step for future work to better address real-life use cases. 
@@ -489,7 +505,7 @@ Suggestion results are limited to one type of pricing scheme. In reality, there 
 
 \section{Methodology}
 
-Evaluation process can be splitted into four phases:
+Evaluation process can be split into four phases:
 \begin{enumerate}
 \item collection and transformation of pricing and usage data,
 \item calculation of key indicators (\textit{cph, ip(scheme1, scheme2), KDI}) and cluster characteristics (\textit{total cost, performance averages}), 
@@ -533,7 +549,7 @@ Settings were tweaked during computation mostly due to frequent Out Of Memory er
 \myparagraph{Pricing data}
 
 Amazon Web Services\footnote{\url{http://aws.amazon.com/}} offered variable pricing schemes based on uptime. Customer could choose an instance configuration and total cost would be calculated based on a number of hours of uptime per day.
-The offering was splitted into three options:
+The offering was split into three options:
 \begin{enumerate}
 \item light - low upfront and high per hour cost,
 \item medium - medium upfront and medium per hour cost,
@@ -569,7 +585,7 @@ For evaluation purposes, we choose two pricing schemes for two different VM conf
 \myparagraph{Usage data}
 
 Google released 29-day cluster usage traces of more than 12k machines that run over 650k jobs~\cite{clusterdata:Reiss2011}. An analysis~\cite{clusterdata:Reiss2012b} revealed that the workload is heterogeneous, which is somewhat unique compared to other traces and makes a good fit for testing.
-The trace contains data about jobs submitted by users. Each job is made of tasks. Each task reports metrics about resource consumption - e.g. CPU, memory - and timestamps. The trace does not contain information about the purpose of the jobs, which limits SLO assumptions to resource utilization. 
+The trace contains data about jobs submitted by users. Each job is made of tasks. Each task reports metrics about resource consumption - e.g. CPU, memory - and timestamps. The trace does not contain information about the purpose of the jobs, which limits SLA assumptions to resource utilization. 
 Resource utilization data is provided in normalized units - the strongest configuration is 1 and the rest of configurations are described in relation to that value.
 
 \myparagraph{Pricing assignment to usage data}
@@ -901,7 +917,7 @@ Scheme 1 is 31\% more expensive than Scheme 2 and this is expected as well as \t
 
 KDI can be used to find inefficiencies.  Any value below 0 indicates non-optimal usage for a given scheme. 
 A user can specify a threshold to find non-optimal cases. We will assume that non-optimal usage within the cluster is when machine reports negative KDI values for the whole trace period.
- These criteria identified 932 and 937 machines for Scheme 1 and 2 respectively. Detailed results splitted by cost and resource utilization are presented in Table~\ref{tab:threshold_based_report}.
+ These criteria identified 932 and 937 machines for Scheme 1 and 2 respectively. Detailed results split by cost and resource utilization are presented in Table~\ref{tab:threshold_based_report}.
 
 \begin{table}[h]
 \begin{center}
@@ -991,7 +1007,7 @@ In both cases, there is more spare capacity than results from Table~\ref{tab:thr
 \label{tab:squeeze-them-in}
 \end{table}
 
-The KDI increased by above 8\% for both schemes. This is expected as we removed machines with negative KDI values. The total cost decreased by 8.04\% and 9.45\% for Scheme 1 and 2 respectively. This is also expected. We noticed a correlation between the increase of KDI and decrease of total cost. However, there is a trade-off in terms of resource utilization, which increased around 7.4\% on average. A user has to decide whether this is acceptable for his specific workload SLOs. It might work well for under-utilized clusters with a low peak-to-mean ratio. For high peak-to-mean workloads, the real difference in utilization patterns can be higher than detected by averages. To measure SLOs in these environments, we would have to use more specific metrics like requests per second or queries per second during peak. 
+The KDI increased by above 8\% for both schemes. This is expected as we removed machines with negative KDI values. The total cost decreased by 8.04\% and 9.45\% for Scheme 1 and 2 respectively. This is also expected. We noticed a correlation between the increase of KDI and decrease of total cost. However, there is a trade-off in terms of resource utilization, which increased around 7.4\% on average. A user has to decide whether this is acceptable for his specific workload SLAs. It might work well for under-utilized clusters with a low peak-to-mean ratio. For high peak-to-mean workloads, the real difference in utilization patterns can be higher than detected by averages. To measure SLAs in these environments, we would have to use more specific metrics like requests per second or queries per second during peak. 
 
 
 \section{New capacity configuration suggestion}
@@ -1037,7 +1053,7 @@ The algorithm analyzed all three \textit{intersection points} available for each
 
 An interesting pattern raised - a medium is always the least optimal choice and heavy is the best. The suggestion to run heavy configuration for Scheme 1 would save 8.05\% compared to non-optimal machines set and 0.0065\% from total cost. Scheme 2 would save 23\% compared to non-optimal machines set and 0.022\% from total cost. KDI increased for both schemes. Scheme 1 noted 8.42\% change and Scheme 2 8.31\%. Light and medium suggestions turned out to be more expensive and were excluded from the rest of considerations. \\
 
-As opposed to the previous algorithm, this one does not violate SLOs. The new suggested capacity handles the same amount of uptime using the same resource configuration as the rest of the cluster. 
+As opposed to the previous algorithm, this one does not violate SLAs. The new suggested capacity handles the same amount of uptime using the same resource configuration as the rest of the cluster. 
 
 
 \section{Validate correlation of total cost and KDI}
