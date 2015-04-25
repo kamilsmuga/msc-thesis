@@ -54,13 +54,38 @@
 \end{abstract}
 \newpage
 
+
+Thanks to my wife Karen for her constant support and patience during the research and writing
+of this Thesis.
+Also, thanks to Prof. John Murphy and Viliam Holub for their support, help and assistance.
+
 %%%%%%%%%%%%%%%%%%%%%%
 %%% INTRODUCTION 
 %%%%%%%%%%%%%%%%%%%%%%
 
+%%        *Some discussion to provide context
+%%        *A description of the problem
+%%        *Motivation for solving the problem
+%%        *A statement of the objectives
+%%        *Related work (mention how your work is different/better)
+%%        *Describe the proposed solution
+%%        *Mention some of the challenges
+%%        *Describe the methodology (modelling and experimentation) and key overall result (e.g., Results show proposed approach can achieve a significant reduction in the cost by enabling a more optimal selection of VM types based on resource utilisation)
+%%        *Structure of the thesis
+
 \chapter{Introduction}
 
-\emph{ /* Type of the project: The 'Big Idea' / proof by construction. */}
+Cloud computing receives significant attention recently ~\cite{5741288}~\cite{5704303}.
+
+The popularity of cloud service spurs the increasing demands of cloud resources to the cloud service providers. Along with the new business opportunities, the pay-as-you-go model drastically changes the usage pattern and brings technology challenges to effective capacity planning.~\cite{6274129}
+
+
+In the cloud context, pricing and capacity planning are two important factors to the profit of the Infrastructure-as-a-Service (IaaS) providers~\cite{6963393}
+
+. We assume that the IaaS provider offers a pay only what you use scheme similar to the Amazon EC2 service, comprising flat, on demand, and spot virtual machine instances.
+
+
+Cloud computing has emerged as a new IT delivery model in which an organization or individual can rent remote compute and storage resources dynamically, using a credit card, to host networked applications “in the cloud.”. The appeal of cloud computing lies in its usage-based pricing model - organizations only pay for the resources that are actually used, and can flexibly increase or decrease the resource capacity allocated to them at any time. This elasticity provided by Cloud computing can yield significant cost savings when compared to the traditional approach of maintaining an expensive IT infrastructure that is provisioned for peak usage - organizations can instead simply rent capacity, and grow and shrink it as the workload changes.~\cite{5961733}
 
 \section{Description of the problem}
 
@@ -70,6 +95,9 @@
 This work aims to design an algorithm that answer IaaS consumer's price optimality questions and help to make adjustments based on uptime based charging per machine. 
 
 \section{Related work}
+
+
+
 
 \section{Challenges}
 
@@ -100,10 +128,20 @@ Modelling and experimentation
 \emph{ /* Description of the problem - cloud-based company runs a mix of software services (real-time streaming, batch, web and database servers) on common hardware. How do they know whether provisioned VMs run in the most optimal configuration? */ }
 
 \section{Literature review}
-\emph{/* Haven't found anything that would tackle this specific problem so far. Might mention the most research is done from IaaS provider perspective? This includes resource scheduling. My work can lead to cost-aware scheduler research */}
 
-%good number of journal papers, a swathe of conference papers, a few recent workshop
-%papers and not too many web sites
+Work related to IaaS market is focused either on provider's perspective~\cite{6274129}, provider-consumer business interactions~\cite{6676685}~\cite{6963393} or consumer point of view~\cite{5961733}~\cite{6295066}. 
+
+
+In this paper~\cite{6274129}, authors focused on an analysis of pay-as-you-go flexible charging impact on IaaS provider's capacity planning. Their contribution was focused on cloud capacity estimation and management. Specifically, they developed a method to predict provisioning demand based on selected time series metrics. 
+Although prediction is not included in this paper, it would be a next logical step for future work to better address real-life use cases. 
+
+This paper~\cite{6963393} studied IaaS consumer's optimal decisions in the monopoly and multiple IaaS providers market. Based on rational customer decisions, authors derived an optimal solution to provider's pricing problem. Furthermore, they modeled the pricing and capacity planning competition among the IaaS providers as a three-stage Stackelberg game and studied existence and conditions to achieve the Nash equilibrium. 
+
+In the work conducted in paper~\cite{6676685}, authors proposed a two-stage provisioning scheme. At the first stage, they proposed a solution that works with flat and on-demand instances. Secondly, they studied bidding for the spot instances as a Stackelberg game. Although not focused on reserved instances, authors developed the system model that might serve as an inspiration for future work to provide suggestions based on application specific QoS metrics. 
+
+
+Paper~\cite{5961733} described a cost-aware system that computed both a cost optimized configuration for the desired capacity as well as plan to migrate current setup to the proposed one. The cost-aware provisioning decisions are based on resource utilization and focused on finding the best resource configuration. Transition cost-aware provisioning included costs of migration and studied options to minimize it. 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -116,13 +154,14 @@ Modelling and experimentation
 
 \subsection{Upfront cost}
 
-Investment in compute resources comes with upfront cost. In case of physical machine it is hardware or lease cost. For virtual resources, IaaS providers offer per hour discounts for upfront charged schemes. \par
-Upfront cost is considered to be one time payment and will be represented by \textit{u}. 
+Investment in compute resources comes with an upfront cost. In case of a physical machines, it is hardware or lease cost. For virtual resources, a client can use IaaS provider services. These usually come with some fixed upfront cost and further per hour charges. \par
+
+The upfront cost is considered to be a one-time payment and will be represented by \textit{u}.
 
 \subsection{Cost per hour}
 
-Cost per hour represents a total cost of running a single machine divided by number of hours in calendar year. Aggregated cost is relatively easy to calculate in rented, virtualized environments. IaaS providers usually charge an X amount per hour. It might vary based on total uptime per month or pricing scheme. This number will be considered as a partial cost per hour and defined as \textit{pcph}. \par
-Cost per hour will be defined as \textit{cph}. It includes upfront cost and IaaS provider per hour charges. It is defined as a function of hours of utilization per day.  
+IaaS providers usually charge an X amount per hour. The charge might vary based on monthly uptime utilization or assigned pricing scheme. This number will be considered as a partial cost per hour and defined as \textit{pcph}. \\
+Cost per hour represents a \textit{total cost} of running a single machine divided by number of hours in a calendar year. It includes upfront cost and per hour charges. It is defined as \textit{cph} and is a function of uptime hours per day summarized by equation~\ref{eq:cph}
 
 \begin{equation}
 \label{eq:cph}
@@ -131,28 +170,25 @@ cph(h) = \frac{u + \sum_{i=1}^{366} pcph \times h}{365 \times h}
 
 \subsection{Intersection points between pricing schemes}
 
-TO BE REWRITTEN!
-
-Cost per hour is calculated for each of available pricing schemes. Single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results produces a graph similar to Figure~\ref{fig:cc2_8xlarge}. \par 
-This representation allows to notice pricing trends. In the example below, price drops exponentially for around first 5 hours of usage and nearly stabilizes afterward. Light is the cheapest option for around 15 hours per day usage. This is better visible on Figure~\ref{fig:cph_cc2_8xlarge_zoom}. After 15 hours, it is better to invest in the Heavy utilization scheme. This is the point that will be called \textit{an intersection point} between 2 pricing schemes and noted as \textit{ip(scheme1, scheme2)}. \par
-For the example below, cc2.8xlarge instance's intersection point between Light and Heavy schemes is \textit{ip(light, heavy) = 16}.
-
+Cost per hour is calculated for each of available pricing schemes. The single result represents a matrix of hours per day and \textit{cph}. Graphical representation of results produces a graph similar to Figure~\ref{fig:cc2_8xlarge}. \par 
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/cph_cc2_8xlarge_zoom}
 	\caption{Zoomed \textit{cph} results for Amazon AWS cc2.8xlarge reserved instance rented for 1 year~\cite{AWS:light}~\cite{AWS:medium}~\cite{AWS:heavy}}
 	\label{fig:cph_cc2_8xlarge_zoom}
 \end{figure}
 
+On the graph, there are visible intersections between pricing scheme's~\textit{cph}s. These points are an area of interest as they indicate when one scheme becomes more expensive than the other. For example, a light is the cheapest option to run for the first 16 hours a day. After this point, it is better to run a heavy utilization scheme. However, if we were to choose between medium and heavy, it would be better to run a medium for the first 13 hours. And between a medium and light, it makes sense to utilize light scheme for the first 18 hours and then switch to medium. 
 
 \section{Algorithm}
 
 \subsection{Prerequisites} 
 
-In order to make data-driven analysis and suggestions for optimization, we need data. The below list of metrics was compiled based on algorithm needs to answer critical questions regarding the state of infrastructure deployment. The list is suitable to guarantee performance SLOs only for compute nodes. Machines with significant I/O usage profile are not covered in this paper. 
+In order to make data-driven analysis and suggestions for optimization, we need data. The below list of metrics was compiled based on algorithm needs to answer critical questions regarding the state of infrastructure deployment. The list is suitable to guarantee performance SLAs for compute nodes. Machines with significant I/O usage profile are not covered in this paper. 
 Metrics can be gathered periodically, per process or per job. There are open source tools available to gather this data, e.g. collectd\footnote{\url{https://collectd.org}}, munin\footnote{\url{http://munin-monitoring.org}}, Logstash\footnote{\url{http://logstash.net}}.
 
+The following list of metrics is required.
 \myparagraph{Machine Id}
-A unique machine ID. Will be used as a key to compute further analytics.
+A unique machine ID. Used as a key to compute further analytics.
 
 \myparagraph{Start and End Time}
 Timestamps to indicate start and end of a measurement period.
@@ -163,16 +199,16 @@ Sampled or averaged CPU usage during a measurement period.
 \myparagraph{RAM usage}
 Canonical memory usage measurement. 
 
-Metrics should be aggregated in \textless K, List\textless V\textgreater\textgreater format where K represents Machine Id and Vs are measurements. 
+Metrics should be aggregated in \textless K, List\textless V\textgreater\textgreater format where K represents Machine Id and List of V is a list of measurements in a given period. 
 
 \subsection{Metrics data transformations and analytics}
 
-Metrics gathered in Prerequisites section have limited knowledge about the environment. Collection per job or per process produces one log line and has a scope of a measurement period. Such structured data itself would not answer machine wide neither cluster-wide questions. The data has to be post-processed to allow calculation of below listed aggregations and analytics.   
+Metrics gathered in Prerequisites section have limited knowledge about the environment. Collection per job or per process produces one log line and has a scope of a measurement period. Such structured data would not help to answer machine-wide neither cluster-wide questions. The data has to be post-processed to allow calculation of below-listed aggregations and analytics.   
 
 \myparagraph{Daily usage}
 
-The data will be analyzed in terms of daily usage. This requires to split metrics into buckets of one day worth of data. 
-It is achieved by applying a simple filter from Listing~\ref{daily_usage} in Apache Spark.
+To comply with IaaS pricing strategies, the data is analyzed in terms of a daily usage. This requires splitting metrics into buckets of one day worth of data. 
+It is achieved by applying a simple Apache Spark filter presented in Listing~\ref{daily_usage} that calculates day number based on metric timestamps.
 
 \begin{lstlisting}[label={daily_usage},caption={Daily usage filter},frame=single]
 
@@ -191,7 +227,7 @@ for x in range(0, days_range):
 
 \myparagraph{Uptime per machine}
 
-The aim for this metric is to find out how long a machine is up. It is a key metric that will be used to calculate optimality factors later on. Algorithm~\ref{alg:uptime_per_machine} represents pseudo-code implementation and Listing~\ref{uptime_per_machine_implementation} contains implementation in Python with Apache Spark. 
+This metric indicates a daily number of hours of machine being up. It is a key metric that is be used to calculate optimality indicators discussed later on. Algorithm~\ref{alg:uptime_per_machine} represents pseudo-code implementation and Listing~\ref{uptime_per_machine_implementation} contains implementation in Python with Apache Spark. The data is extracted from timestamp values previously grouped into daily data buckets.
 
 \begin{algorithm}[h]
 \caption{Uptime per machine}
@@ -227,7 +263,7 @@ max_end = distFile.map(lambda(line):
 
 \myparagraph{Cost per hour}
 
-This is an implementation of \textit{cph} metric~\ref{eq:cph} defined in Taxonomy. Algorithm~\ref{alg:cost_per_hour} represents pseudo-code and Listing~\ref{cost_per_hour} shows implementation in Python.
+This is an implementation of \textit{cph} metric~\ref{eq:cph} defined in Taxonomy. Algorithm~\ref{alg:cost_per_hour} represents pseudo-code and Listing~\ref{cost_per_hour} shows implementation in Python. The algorithm returns a mapping of number of uptime hours per day and corresponding~\textit{cph} values.
 
 \begin{algorithm}[H]
  \caption{Cost per hour}
@@ -247,7 +283,7 @@ def _calc_cost_per_hour(self, upfront, cost_per_hour, hours_per_day):
 
 \myparagraph{Intersection points}
 
-This is an implementation of \textit{ip(scheme1, scheme2)} defined in Taxonomy. This metric will be a reference point that identifies optimality points based on~\textit{cph} for various schemes. Algorithm~\ref{alg:intersection points} represents pseudo-code and Listing~\ref{intersection_points} shows implementation in Python. 
+This is an implementation of \textit{ip(scheme1, scheme2)} metric defined in Taxonomy. This represents a reference point that finds intersections of~\textit{cph}s for various schemes. Algorithm~\ref{alg:intersection points} represents pseudo-code and Listing~\ref{intersection_points} shows implementation in Python. 
 
 \begin{algorithm}[H]
  \label{alg:intersection points}
@@ -272,16 +308,26 @@ def _calc_intersection_point(self, first, second):
 \end{lstlisting}
 \end{minipage}
 
-\myparagraph{Uptime Based Distance From Intersection Points}
+\myparagraph{Key Distance Indicator}
 
-This metric represents a distance from intersection points calculated based on uptime. The result can be negative - indicates non-optimal profile - or positive otherwise. Positive and negative values can be yielded in either direction of the time axis as presented in Figure~\ref{fig:distance}. 
-It will be specified by flag parameter calculated together with \textit{ip(scheme1, scheme2)} results. Algorithm~\ref{alg:distance_from_optimality} represents pseudo-code implementation.
+This metric represents a distance from intersection points calculated based on uptime. The result can be negative - to indicate a non-optimal profile - or positive otherwise. Positive and negative values can be yielded in either direction of the time axis as presented in Figure~\ref{fig:distance}. 
 
 \begin{figure}[H]
        \includegraphics[width=\linewidth]{figures/distance}
       \caption{Distance from intersection points. Positive (green) values indicate the optimal result. Negative (red) represent data for further improvement.}
         \label{fig:distance}
 \end{figure}
+
+At 18 hours, the point of scheme cost intersection (highlighted as 1), it does not matter which scheme is chosen as cost is the same. This is point 0.
+
+At each side of the intersection point either scheme1 or scheme 2 is more preferable.
+
+For example, a machine running for 20 hours on scheme1 is running 2 hours outside our optimum 18 hour scheme cost intersection. This gives us a score of -2 for this machine compared to the same machine running on scheme 2 where the benefits continue to increase the longer the machine is running.
+
+The same is true for a machine running for 10 hours on scheme 2. We are running at -8 below our optimum. In this case we would be more cost beneficial to run this machine on scheme1. Giving us a score of +8.
+
+Algorithm~\ref{alg:distance_from_optimality} represents pseudo-code implementation.
+
 
 \begin{algorithm}[H]
  \label{alg:distance_from_optimality}
@@ -296,24 +342,15 @@ It will be specified by flag parameter calculated together with \textit{ip(schem
 \caption{Uptime Based Distance From Intersection Points}
 \end{algorithm}
 
-Example algorithm results
-\begin{enumerate}
-\item Input: Uptime: 24, Optimality Point: 18, Bias: True (more optimal for values above threshold). Output: +6
-\item Input: Uptime: 16, Optimality Point: 18, Bias: True (more optimal for values above threshold). Output: -2
-\item Input: Uptime: 15, Optimality Point: 18, Bias: False (more optimal for values below threshold). Output: +3
-\item Input: Uptime: 19, Optimality Point: 18, Bias: False (more optimal for values below threshold). Output: -1
-\end{enumerate}
-
-\subsection{Recognize inefficiencies and suggest changes}
+\subsection{Recognition of inefficiencies and suggestions for changes}
 
 \myparagraph{Threshold Based Report}
 
-Generate report of machines based on distance from optimality points. Use customizable threshold. 
-Results from the report will be used to calculate suggestions.
+A user can define which KDI value is non-optimal and run a report to find machines below this point. For example, every negative KDI value signalizes there is a better pricing scheme available. A user can catch this situation by having a threshold value set to 0. However, there might be a situation when machine is taken for maintenance and reports negative values for one or couple of days. To avoid this kind of noise, a user can add an another criteria to specify a minimum number of days of reported values below the threshold.
 
 \myparagraph{Aggregated CPU and memory usage}
 
-Aggregated values of CPU and memory will help to suggest better utilization strategies that guarantee SLOs. Algorithm~\ref{alg:agg_cpu_mem} represents pseudo-code implementation and~\ref{agg_cpu_mem_implementation} contains implementation in Python with Apache Spark.
+An aggregated daily values of CPU and memory will help to suggest better utilization strategies that guarantee SLAs. Algorithm~\ref{alg:agg_cpu_mem} represents pseudo-code implementation and~\ref{agg_cpu_mem_implementation} contains implementation in Python with Apache Spark.
 
 \begin{algorithm}[h]
 \caption{Aggregated CPU and memory}
@@ -379,8 +416,9 @@ task_counter = distFile.map(mapping).reduceByKey(add)
 
 \subsubsection{Squeeze-them-in suggestion strategy}
 
-The proposed strategy calculates an amount of spare CPU and memory capacity based on cluster-wide averages. Aggregated value for CPU and memory represents an amount of capacity gathered from machines that are utilized below average. Based on the amount of aggregated capacity, the algorithm will attempt to squeeze in a maximum amount of machines gathered from Threshold Based Report. As a result, it will propose to turn off a number of machines and guarantee that SLOs will be met.
-This approach performs well when underutilized machines exist. For well-balanced clusters with similar usage patterns, it does not find a lot of spare capacities and would propose fairly limited improvements. 
+The proposed strategy calculates an amount of spare CPU and memory capacity based on cluster-wide averages. Aggregated value for CPU and memory represents an amount of capacity gathered from machines that are utilized below the average. Based on the amount of aggregated capacity, the algorithm will attempt to squeeze in a maximum amount of machines returned by threshold-based report. As a result, it proposes to turn off a number of machines and that can fit in calculated below-average capacity. \\
+This approach has a potential to perform well in under-utilized clusters. For well-balanced environments with similar usage patterns, it does not find a lot of spare capacity and would propose fairly limited improvements. \\
+A pseudo-code implementation of this idea is presented in Algorith~\ref{alg:squeeze-them-in}.
 
 \begin{algorithm}[h]
 \caption{Squeeze them in suggestion strategy}
@@ -413,38 +451,30 @@ This approach performs well when underutilized machines exist. For well-balanced
 
 \end{algorithm}
 
-\subsubsection{New Capacity configuration suggestion}
+\subsubsection{New capacity configuration suggestion}
+
+New configuration is calculated based on input from the report, list of available schemes and total uptime to handle. Pseudo-code implementation is presented in Algorithm~\ref{alg:new_configuration}. The algorithm iterates through all of available schemes, reads \textit{intersection points} and gets \textit{cph} for each of the \textit{ip}s. It returns a total cost and number of machines required for each proposed configuration. \\
+Suggestion results are limited to one type of pricing scheme. In reality, there might be a more optimal solution yielded from mixing pricing schemes. 
 
 \begin{algorithm}[h]
 \caption{New configuration suggestion}
 \label{alg:new_configuration}
- \KwData{List of machines from Threshold Based Report, List of available schemes, Average number tasks per hour;}
+ \KwData{List of machines from Threshold Based Report, List of available schemes, Total uptime;}
  \KwResult{New configuration suggestion}
  \algrenewcommand\algorithmicfunction{\textbf{class}}
  \algrenewcommand\algorithmicprocedure{\textbf{method}}
 
   $float[ ] totalCost;$
-  $float totalCpu = 0;$
-  $float totalMemory = 0;$
-
-\ForAll{machine in machinesFromReport}{
-        machine.cpu += totalCpu;
-        machine.memory += totalMemory;
-}
 
 \ForAll{scheme in availableSchemes}{
-		hoursPerDay = scheme.getHours();
-        cpuCap = hoursPerDay * clusterCpuAvgPerHour;
-        memCap = hoursPerDay * memoryCpuAvgPerHour;
-
-        vmsReqCpu = totalCpu / cpuCap;
-        vmsReqMem = totalMemory / memCap;
-
-        totalCost[scheme] = min(vmsReqCpu, vmsReqMem) * scheme.cph;
+		\ForAll{ip in scheme.intersectionPoints}{
+			vms = Uptime / ip.getHours() \\
+			cost = ip.getCphForHours(ip.getHours()) \\
+			totalCost[ip] = (vms, cost)
+		}
 }
 
-\Return{min(totalCost)}
-
+\Return{totalCost}
 \end{algorithm}
 
 
@@ -1012,15 +1042,14 @@ As opposed to the previous algorithm, this one does not violate SLOs. The new su
 
 \section{Validate correlation of total cost and KDI}
 
+We aggregated all of the generated suggestions and graphed values of KDI and total cost changes on Figure~\ref{fig:kdi_to_cost}. 
+By design, KDI reports higher positive number when usage is more optimal. We can see that for each suggestion generated by both algorithms, KDI increased and the total cost dropped. This suggests a direct correlation between these values. However, higher KDI increase did not directly decreases the total cost further.  
+
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{figures/kdi_to_cost}
 	\caption{KDI to total cost correlation}
 	\label{fig:kdi_to_cost}
 \end{figure}
-
-
-\section{Summary}
-
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% CONCLUSION AND 
@@ -1034,8 +1063,23 @@ It works and is great!
 
 \myparagraph{Future Work}
 \begin{enumerate}
-\item Visual recognition of underperforming machines
-\item Prediction trend to generate suggestions
+\item Visual recognition of underperforming machines using horizon charts (http://vis.berkeley.edu/papers/horizon/)
+\item Create an optimality model and adjust new capacity suggestions to find the best combination
+\item Predict growth trend and adjust configuration suggestions
+
+%%
+%%Also, just to reiterate a couple of things I mentioned
+%%before: while a realistic algorithm would have to
+%%account for predicted prices, predicted discounts,
+%%etc I think you should initially focus on a scenario
+%%where the pricing scheme is fixed (though the prices
+%%themselves will vary in time, naturally). And it's very
+%%important that you produce 'something' working e.g.
+%%an implementation of your algorithm, tied into the
+%%data and so on.
+
+%%
+
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%
