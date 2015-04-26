@@ -48,8 +48,7 @@
 
 \begin{abstract}
 
-\emph{ /* To be revised. */} \par
-\textsl{New Infrastructure as a Service solutions are becoming available with a growing number of supported pricing models. More often than not, a hosted Cloud environment is used to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilization and uptime reveals new challenges in already unpredictable capacity planning process. There is a choice between ad-hoc provisioning and upfront payments with reduced hourly rates. Reserved instances charged upfront are categorized into three groups: light, medium and heavy. Which one is better for a given utilization model? When exactly does one pricing scheme becomes more cost effective? Determining which machine type is better for a given utilization model, or at which point the cost effectiveness of a pricing scheme changes, is vital for the companies subscribing to the IaaS. }
+\textsl{New Infrastructure as a Service solutions are becoming available with a growing number of supported pricing models. A hosted Cloud environment can be a choice to design and build an infrastructure for a product. The recent availability of different pricing schemes based on resource utilization and uptime reveals new challenges in an already complex capacity planning process. There is a choice between ad-hoc provisioning and time commitment that comes with reduced hourly rates. When one decides for a time commitment, there are still further pricing options available. Few different prices for the same resource that depend on a daily uptime. Which one is the best one? When exactly does one pricing scheme becomes more cost effective that the other? We attempted to answer these critical questions by i) aggregating and transforming metrics data, ii) designing key optimality indicators, iii) using the indicators to build algorithms that suggest better configuration options, iv) using an existing large dataset to evaluate the algorithms. }
 
 \end{abstract}
 \newpage
@@ -100,7 +99,7 @@ Main challenges include dealing with dynamic changes of pricing schemes offered 
 
 %%        *Describe the methodology (modelling and experimentation) and key overall result (e.g., Results show proposed approach can achieve a significant reduction in the cost by enabling a more optimal selection of VM types based on resource utilisation)
 
-We used modelling and experimentation methodology to build and evaluate the result. The SaaS provider perspective got represented by an availability of per task and per machine metrics. We came up with aggregations and key indicators that helped to characterise an existing state of the configuration. Then, we experimented with algorithms to design ones that can yield positive improvements in the total cost.
+We used modelling and experimentation methodology to build and evaluate results. The SaaS provider perspective got represented by an availability of per task and per machine metrics. We came up with aggregations and key indicators that helped to characterise an existing state of the configuration. Then, we experimented with algorithms to design ones that can yield positive improvements in the total cost.
 Results show proposed approach can achieve a meaningful reduction in the cost by enabling a more optimal assignment of VMs based on uptime and resource utilization. 
 
 \myparagraph{Structure of the Thesis}\\
@@ -598,7 +597,7 @@ The light scheme is a good fit for relatively short periods of time, e.g. during
 We will refer to cc2.8xlarge and m2.4xlarge reserved instances pricing data as \textit{Scheme 1} and \textit{Scheme 2}.  
  
 
-\section{Input data schema transformation and aggregations}
+\section{Schema transformations and aggregations}
 
 Google trace data contains a lot of detailed information. This paper focuses on uptime and we extracted only relevant data for further evaluation. Machine and task events original schema is presented in Tables~\ref{tab:machine_events} and~\ref{tab:task_events} and fields selected for further transformation and aggregation are marked in bold text. 
 
@@ -1091,6 +1090,7 @@ Each aggregation, key indicator and algorithm was designed as a proof of concept
 \begin{enumerate}
 \item Capacity growth trend calculation. Update algorithms to suggest optimal configurations using the trend. 
 \item Predict price changes and discounts. Moore's Law still works~\cite{7057609} and optimizations that affect future should take this into account.
+\item Calculate a cost of migration to a newly suggested configuration. This cost should be added to a total cost that is calculated.
 \item Use horizon charts\footnote{\url{http://vis.berkeley.edu/papers/horizon}} to visualize~\textit{KDI} values. It would be an improvement to the threshold-based report as there might be a set of machines just below the threshold that are not recognized by the report.
 \item Research whether~\textit{KDI} correlates to a total cost in bigger sets of data and various pricing environments. If this was true, KDI could be used to validate suggestion algorithms results. 
 
