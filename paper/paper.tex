@@ -66,54 +66,48 @@ Also, thanks to Prof. John Murphy and Viliam Holub for their support, help and a
 \chapter{Introduction}
 
 %%        *Some discussion to provide context
-%%  Cloud computing stal sie popularny. Firmy zaczynaja budowac cale modele biznesowe w oparciu o Cloud, 
-%% 	Wczuwamy sie w  SaaS. Uzywamy IaaS zeby hostowac na tym produkt. 
 
-In recent years, Cloud Computing receives significant attention~\cite{6185529}~\cite{5741288}~\cite{5704303} and delivers infrastructure, platform and/or software as services over the Internet~\cite{7073248}.
-
-The popularity of cloud service pushes cloud service providers to provide 
-
-The popularity of cloud service spurs the increasing demands of cloud resources to the cloud service providers. Along with the new business opportunities, the pay-as-you-go model drastically changes the usage pattern and brings technology challenges to effective capacity planning.~\cite{6274129}
+In recent years, Cloud Computing receives significant attention~\cite{6185529}~\cite{5741288}~\cite{5704303} and delivers infrastructure, platform and/or software as services over the Internet~\cite{7073248}. The popularity of cloud service encouraged many cloud service providers, like Amazon, Google, Microsoft, IBM and VMWare to come up with a range of provisioning and pricing schemes. The popular pay-as-you-go pricing model changes the usage patterns and influences the way capacity planning is done~\cite{6274129}. For example, one virtual machine configuration can have few different prices based on its uptime and pricing scheme. The dependency on uptime value is the central point of consideration in this thesis. We look from the perspective of Software as a Service (SaaS) provider that uses an Infrastructure as a Service (IaaS) provider's services to host a product. In this context, pricing and capacity planning are two important constituents of SaaS provider's success~\cite{6963393}.
 
 %%        *A description of the problem
-%% Znamy wymagania sprzetowe. Stajemy przed pytaniami: 1) jak duzo VMow 2) jakiego rodzaju 3) na jak dlugo ma kazda dzialac
+
+IaaS consumer can face a situation when resource-based capacity is known and it is time to rent an optimal machine configuration from the provider. It raises few open ended questions, including i) how many VMs is needed? ii) what kind of VMs and which pricing scheme? iii) how long should each VM run? In this thesis, we attempt to answer these questions in a cost-aware fashion considering uptime-based pricing models.
 
 %%        *Motivation for solving the problem
-%% rozwiazanie problemu ma 2 glowne aspekty: 1) optymalniejsze ustawienie istniejacej architektury - oszczednosci (jaki procent?), ktore mozna zainwestowac gdzies indziej 2) to decyduje o byc lub nie byc dla oplacalnosci biznesu, ktory dziala na marginesach
+
+Answers to above questions have influence in two main cases 1) to decide on pricing of a product, 2) to optimize an existing configuration and bring savings.  The former is crucial for SaaS providers as they derive profits from the margin between the operational costs of infrastructure and revenue generated from customers~\cite{efficient_resource_allocation}. In other words, having this set right, gives a competitive advantage and greatly contributes to a healthy business. The latter proved to yield savings up to 9.45\% that can be invested in other aspects of a business.   
 
 %%        *A statement of the objectives
-%% 1) chcemy opracowac liste niezbednych metryk, ktore umozliwiaja podejmowanie decyzji na podstawie danych 2) chcemy zaprojektowac wspolczynniki, ktore wyznaczaja i) rzeczywista cene uzywania pricing scheme ii) momenty stawania sie jednej scheme bardziej oplacalna od drugiej iii) wspolczynnika okreslajacego odleglosc od optymalnych punktow 3) chcemy zaprojektowac algorytmy, ktore zaproponuja zmiany w architekturze ze wgledu na uptime i cene i podadza nowa cene 
+
+Motivated by a possibility to influence above factors, we propose a data-driven approach to solving this problem. Our objectives include:
+\begin{enumerate}
+\item Selection, collection and post-processing of crucial metrics that contribute to a final price and Service Level Agreements (SLAs).
+\item Design and calculation of key indicators related to: i) total cost per hour (\textit{cph}), ii) exact points when one scheme becomes more optimal than the other - called intersection points (\textit{ip(scheme1, scheme2)}), iii) distance from intersection points (\textit{KDI}) used as a key indicator to categorize a single VM usage pattern.
+\item Design and evaluation of two suggestion algorithms that take above data as an input and returns a new configuration suggestion and associated total cost.
+\end{enumerate}
 
 %%        *Related work (mention how your work is different/better)
-%% prace czesto operieraja sie na IaaS albo relacji pomiedzy Saas i IaaS. Te, ktore sa z perspektywy SaaS nie uwzgledniaja tego, ze uptime wplywa na pricing.  
+
+Most of the related work is conducted from an IaaS provider perspective~\cite{6274129}~\cite{6253563} or aimed to find an optimal pricing state for providers and consumers to collaborate~\cite{6676685}~\cite{6963393}. This thesis is different in a way that it analyses a SaaS provider capacity planning in an environment when one resource have different prices tightly coupled with an uptime.
 
 %%        *Describe the proposed solution
-%% 1) wybralismy pewne metryki 2) policzylismy agregacje metryk w stosunku per maszyna dziennie 3) obliczylismy wspolczynniki - cph, ip(scheme1, scheme2), KDI 5) zaprojektowalismy 2 algorytmy do sugestii - krotki opis 5) uzylismy wspolczynnikow i metryk jako danych wejsciowych to algorytmow sugestii zmian
+
+Our proposed solution implements listed objectives using mainly map-reduce jobs executed on Apache Spark\footnote{\url{https://spark.apache.org}} platform. Aggregations, key indicators and algorithms were designed, implemented in pseudo-code and Python and evaluated on Google cluster-usage trace~\cite{clusterdata:Reiss2011}. 
 
 %%        *Mention some of the challenges
-%% 1) zmieniajace sie ceny i zasady u providerow - coraz taniej (dowod?) 2) dostosowanie sie do sugestii wymaga migracji z istniejacego srodowiska do nowego - koszt tego nie zostal wliczony, a powinien 3) obliczenia agregacji musza byc dobrze zaimplementowane, zeby byly mozliwe na duzych ilosciach danych
+
+Main challenges include dealing with dynamic changes of pricing schemes offered by IaaS providers. Even though the thesis uses Amazon's related taxonomy, it should be read as an attempt to solve a general case for uptime-based variable pricing capacity planning. Other challenging aspect is a cost of migration to suggested environment. It was not considered in the results, however, it created an opportunity for future work to investigate an impact of the delta difference between an old and new configuration cost. Lastly, we hit a technical issues related to implementation and execution of aggregations and algorithms on large data sets. Jobs were failing due to not enough RAM capacity on a single machine. The issues were resolved by a combination of code improvements, like changing the way aggregations build hash-maps and an increase of parallelism and chunking granularity on the platform.
 
 %%        *Describe the methodology (modelling and experimentation) and key overall result (e.g., Results show proposed approach can achieve a significant reduction in the cost by enabling a more optimal selection of VM types based on resource utilisation)
-%% metodologia - zamodelowanie sytuacji i rozwiazania - eksperymentacja z algorytmami - 
-%%        *Structure of the thesis
 
+We used modelling and experimentation methodology to build and evaluate the result. The SaaS provider perspective got represented by an availability of per task and per machine metrics. We came up with aggregations and key indicators that helped to characterise an existing state of the configuration. Then, we experimented with algorithms to design ones that can yield positive improvements in the total cost.
+Results show proposed approach can achieve a meaningful reduction in the cost by enabling a more optimal assignment of VMs based on uptime and resource utilization. 
 
-
-
-In the cloud context, pricing and capacity planning are two important factors to the profit of the Infrastructure-as-a-Service (IaaS) providers~\cite{6963393}
-
-. We assume that the IaaS provider offers a pay only what you use scheme similar to the Amazon EC2 service, comprising flat, on demand, and spot virtual machine instances.
-
-
-Cloud computing has emerged as a new IT delivery model in which an organization or individual can rent remote compute and storage resources dynamically, using a credit card, to host networked applications “in the cloud.”. The appeal of cloud computing lies in its usage-based pricing model - organizations only pay for the resources that are actually used, and can flexibly increase or decrease the resource capacity allocated to them at any time. This elasticity provided by Cloud computing can yield significant cost savings when compared to the traditional approach of maintaining an expensive IT infrastructure that is provisioned for peak usage - organizations can instead simply rent capacity, and grow and shrink it as the workload changes.~\cite{5961733}
-
-
-\section{Structure of the Thesis}
-\textbf{Background}. This section will outline the background information related to IaaS consumer challenges related to understanding the whole picture for price optimality of rented infrastructure. \par
-\textbf{Design}. This section explains design and environment conditions for the algorithm to be useful. \par
-\textbf{Implementation}. This section explains algorithm implementation details and data analytics software that was used - Apache Spark\footnote{\url{https://spark.apache.org}}. \par
-\textbf{Evaluation}. The proposed algorithmic approach is applied to Google Trace data~\cite{clusterdata:Reiss2011}. \par
-\textbf{Conclusion and Future Work}. The completed data analysis is discussed. Further work related to algorithm improvements, automation and lessons learned are presented. 
+\myparagraph{Structure of the Thesis}\\
+\textbf{Background}. This section outlines the background information related to IaaS consumer point of view and challenges related to finding the best configuration for the money. \par
+\textbf{Design and Implementation}. This section explains design and environmental conditions for the aggregations, key indicators and algorithms. It also dives into implementation details on the Apache Spark platform. \par
+\textbf{Evaluation}. The proposed map-reduce jobs and algorithms are evaluated on Google cluster-usage trace data. \par
+\textbf{Conclusion and Future Work}. The suggestion results data and future work related to algorithm improvements are presented. 
  
 \newpage
 
@@ -1079,13 +1073,26 @@ By design, KDI reports higher positive number when usage is more optimal. We can
 \chapter{Conclusion and Future Work}
 
 \myparagraph{Conclusion}
-It works and is great!
+We proposed an uptime-based approach for capacity planning in Cloud environments. 
+
+At first, we selected metrics required to make data-driven decisions. We applied transformations and aggregations to extract relevant data on a daily, per machine basis. Based on that, we calculated and applied our proposed key indicators -~\textit{cph, ip(scheme1, scheme2), KDI}- and assessed the state of Google trace data's optimality. It turned out that based purely on~\textit{KDI} values, around 7-8\% of machines could benefit from reconfiguration. We used this data as an input to our two suggestion algorithms. 
+
+Squeeze-them-in algorithm suggested that there is enough spare capacity to power off non-optimal machines. As a result, the total cost dropped by 8.04\% and 9.45\% for both analyzed pricing configurations. Obviously, this came with a trade-off related to a higher utilization of the cluster. CPU and memory averages increased by around 7\%. There is not enough data to state whether this is acceptable or not. We would have to make assumptions, therefore the final evaluation of the algorithm's usefulness is delegated to the user and his specific requirements.
+
+New capacity configuration algorithm suggested alternative VM arrangements. Some of them turned out to be worse and got excluded from further analysis. It is worth to note that suggestions that were actually better, in this context - cheaper, contained only Heavy instances for both analyzed schemes. They yielded improvements in a range from 8 to 23\% compared to the previous non-optimal configuration and from 0.0065 to 0.022\% in relation to the total cost.
+
+It is somewhat safe to assume that when~\textit{KDI} is negative, a configuration is non-optimal. It indicates that there are more machines that report negative~\textit{KDI} values than positive and it is something worth to investigate. However, when cluster-wide~\textit{KDI} equals 0 or is positive, the number itself does not represent a lot of insight. There might be a situation when half of the machines run in a quite optimal way and yield high~\textit{KDI} values and, at the same time, the other half is non-optimal. As a result of that, we cannot tie a positive~\textit{KDI} value to indicate an optimal configuration. A positive value is better than negative, however, even this statement was not formally proved and can yield surprising results. Nevertheless, we discovered a correlation between~\textit{KDI} increase and total cost decrease. It is not a linear correlation - higher~\textit{KDI} increases does not seem to cause bigger cost decreases. This is an exciting discovery that can be validated further in future work using bigger data sets and different environments. 
+The fact these two metrics correlate can be used to validate new suggestion algorithms.
 
 \myparagraph{Future Work}
+
+Each aggregation, key indicator and algorithm was designed as a proof of concept and can be developed and evaluated further. However, there are few key contributions that would make this thesis more valuable in real-life scenarios.
+
 \begin{enumerate}
-\item Visual recognition of underperforming machines using horizon charts (http://vis.berkeley.edu/papers/horizon/)
-\item Create an optimality model and adjust new capacity suggestions to find the best combination
-\item Predict growth trend and adjust configuration suggestions
+\item Capacity growth trend calculation. Update algorithms to suggest optimal configurations using the trend. 
+\item Predict price changes and discounts. Moore's Law still works~\cite{7057609} and optimizations that affect future should take this into account.
+\item Use horizon charts\footnote{\url{http://vis.berkeley.edu/papers/horizon}} to visualize~\textit{KDI} values. It would be an improvement to the threshold-based report as there might be a set of machines just below the threshold that are not recognized by the report.
+\item Research whether~\textit{KDI} correlates to a total cost in bigger sets of data and various pricing environments. If this was true, KDI could be used to validate suggestion algorithms results. 
 
 %%
 %%Also, just to reiterate a couple of things I mentioned
